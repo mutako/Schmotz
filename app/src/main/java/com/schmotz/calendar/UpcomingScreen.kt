@@ -15,14 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
 @Composable
-fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile?) {
-    val household = profile?.householdCode ?: "FAMILY"
+fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
+    val household = profile.householdCode.ifBlank { "FAMILY" }
     val all by repo.observeAllEvents(household).collectAsState(initial = emptyList())
     val today = LocalDate.now()
     val upcoming = all.filter {

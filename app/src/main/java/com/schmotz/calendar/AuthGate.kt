@@ -1,9 +1,21 @@
 package com.schmotz.calendar
 
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.material3.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -11,7 +23,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AuthGate(
-    repo: Repo,
+    repo: FirestoreRepository,
     content: @Composable (UserProfile) -> Unit
 ) {
     var loading by rememberSaveable { mutableStateOf(true) }
@@ -20,17 +32,16 @@ fun AuthGate(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        scope.launch {
-            runCatching { repo.ensureProfile() }
-                .onSuccess {
-                    profile = it
-                    loading = false
-                }
-                .onFailure {
-                    error = it.message ?: "Failed to load profile"
-                    loading = false
-                }
-        }
+        runCatching { repo.ensureProfile() }
+            .onSuccess {
+                profile = it
+                loading = false
+            }
+            .onFailure {
+                error = it.message ?: "Failed to load profile"
+                profile = null
+                loading = false
+            }
     }
 
     when {
@@ -46,7 +57,11 @@ fun AuthGate(
                     scope.launch {
                         runCatching { repo.ensureProfile() }
                             .onSuccess { profile = it; loading = false }
-                            .onFailure { error = it.message; loading = false }
+                            .onFailure {
+                                error = it.message ?: "Failed to load profile"
+                                profile = null
+                                loading = false
+                            }
                     }
                 }) { Text("Retry") }
             }
