@@ -1,4 +1,3 @@
-
 # Schmotz Calender (Android)
 
 A couples' calendar + shared links app built with Kotlin & Jetpack Compose.
