@@ -2,10 +2,7 @@ package com.schmotz.calendar
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.Html
-import android.text.Spanned
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -51,11 +48,21 @@ class ShareActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val profile = repo.ensureProfile()
+                val (metaTitle, metaDesc, metaImage) = if (url.isNotBlank()) {
+                    fetchMetadata(url)
+                } else {
+                    Triple(title.ifBlank { url }, desc, null)
+                }
+                val finalTitle = metaTitle.ifBlank { title.ifBlank { url } }
+                val finalDesc = metaDesc ?: desc
                 val link = SharedLink(
-                    title = title.ifBlank { url },
+                    title = finalTitle,
                     url = url,
-                    description = desc,
-                    sharedByName = auth.currentUser?.displayName ?: auth.currentUser?.email.orEmpty()
+                    description = finalDesc,
+                    imageUrl = metaImage,
+                    sharedByUid = auth.currentUser?.uid.orEmpty(),
+                    sharedByName = auth.currentUser?.displayName ?: auth.currentUser?.email.orEmpty(),
+                    sharedAt = System.currentTimeMillis()
                 )
                 // Store under household links collection.
                 FirebaseFirestore.getInstance()

@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -122,6 +123,7 @@ fun CalendarScreen(
 
     var overviewDate by remember { mutableStateOf<LocalDate?>(null) }
     var editingDate by remember { mutableStateOf<LocalDate?>(null) }
+    var editingEvent by remember { mutableStateOf<Event?>(null) }
     var newTitle by remember { mutableStateOf("") }
     var isAllDay by remember { mutableStateOf(false) }
     var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
@@ -131,7 +133,7 @@ fun CalendarScreen(
     var showRepeatChooser by remember { mutableStateOf(false) }
     var showMonthOverview by remember { mutableStateOf(false) }
     var selectedColorInt by remember { mutableStateOf(0) }
-    var colorPickerTarget by remember { mutableStateOf<Event?>(null) }
+    var pendingDeleteEvent by remember { mutableStateOf<Event?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
@@ -139,6 +141,7 @@ fun CalendarScreen(
 
     fun beginCreateEvent(forDate: LocalDate) {
         editingDate = forDate
+        editingEvent = null
         newTitle = ""
         isAllDay = false
         startTime = LocalTime.of(9, 0)
@@ -146,6 +149,27 @@ fun CalendarScreen(
         repeatFrequency = RepeatFrequency.NONE
         validationError = null
         selectedColorInt = defaultEventColor.toArgb()
+    }
+
+    fun beginEditEvent(event: Event) {
+        val zone = ZoneId.systemDefault()
+        val start = Instant.ofEpochMilli(event.startEpochMillis).atZone(zone)
+        val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
+
+        editingEvent = event
+        editingDate = start.toLocalDate()
+        newTitle = event.title
+        isAllDay = event.allDay
+        if (event.allDay) {
+            startTime = LocalTime.of(9, 0)
+            endTime = LocalTime.of(10, 0)
+        } else {
+            startTime = start.toLocalTime()
+            endTime = end.toLocalTime()
+        }
+        repeatFrequency = event.repeatFrequency
+        validationError = null
+        selectedColorInt = eventColorInt(event, defaultEventColor)
     }
 
     fun showTimePicker(initial: LocalTime, onTimeSelected: (LocalTime) -> Unit) {
@@ -227,7 +251,7 @@ fun CalendarScreen(
                     EventCard(
                         event = event,
                         defaultColor = defaultEventColor,
-                        onEditColor = { selected -> colorPickerTarget = selected }
+                        onEventClick = { beginEditEvent(it) }
                     )
                 }
             }
@@ -244,7 +268,10 @@ fun CalendarScreen(
                     date = date,
                     events = dayEvents,
                     defaultEventColor = defaultEventColor,
-                    onEditColor = { event -> colorPickerTarget = event }
+                    onEventClick = { event ->
+                        overviewDate = null
+                        beginEditEvent(event)
+                    }
                 )
             },
             confirmButton = {
@@ -261,7 +288,11 @@ fun CalendarScreen(
 
     editingDate?.let { date ->
         AlertDialog(
-            onDismissRequest = { editingDate = null },
+            onDismissRequest = {
+                editingDate = null
+                editingEvent = null
+                validationError = null
+            },
             title = { Text(date.format(dateFormatter)) },
             text = {
                 Column {
@@ -343,6 +374,18 @@ fun CalendarScreen(
                         Spacer(Modifier.height(8.dp))
                         Text(it, color = MaterialTheme.colorScheme.error)
                     }
+                    editingEvent?.takeIf { it.id.isNotBlank() }?.let {
+                        Spacer(Modifier.height(12.dp))
+                        TextButton(
+                            onClick = { pendingDeleteEvent = it },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            ),
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("Delete")
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -365,8 +408,8 @@ fun CalendarScreen(
                     validationError = null
                     scope.launch {
                         runCatching {
-                            val event = Event(
-                                id = "",
+                            val base = editingEvent
+                            val event = (base ?: Event()).copy(
                                 title = trimmedTitle,
                                 startEpochMillis = startMillis,
                                 endEpochMillis = endMillis,
@@ -379,6 +422,7 @@ fun CalendarScreen(
                             newTitle = ""
                             repeatFrequency = RepeatFrequency.NONE
                             editingDate = null
+                            editingEvent = null
                         }.onFailure {
                             validationError = it.message ?: "Unable to save event"
                         }
@@ -386,33 +430,11 @@ fun CalendarScreen(
                 }) { Text("Save") }
             },
             dismissButton = {
-                TextButton(onClick = { editingDate = null }) { Text("Cancel") }
-            }
-        )
-    }
-
-    colorPickerTarget?.let { target ->
-        val initialSelection = eventColorInt(target, defaultEventColor)
-        AlertDialog(
-            onDismissRequest = { colorPickerTarget = null },
-            title = { Text("Choose event color") },
-            text = {
-                ColorPickerRow(
-                    colors = eventColorChoices,
-                    selectedColorInt = initialSelection,
-                    onSelect = { chosen ->
-                        scope.launch {
-                            repo.upsertEvent(
-                                profile,
-                                target.copy(colorArgb = colorIntToLong(chosen))
-                            )
-                            colorPickerTarget = null
-                        }
-                    }
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { colorPickerTarget = null }) { Text("Close") }
+                TextButton(onClick = {
+                    editingDate = null
+                    editingEvent = null
+                    validationError = null
+                }) { Text("Cancel") }
             }
         )
     }
@@ -447,6 +469,47 @@ fun CalendarScreen(
         )
     }
 
+    pendingDeleteEvent?.let { event ->
+        AlertDialog(
+            onDismissRequest = { pendingDeleteEvent = null },
+            title = { Text("Delete this event?") },
+            text = {
+                Text(
+                    text = "Are you sure you want to remove \"${event.title}\"?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            val result = runCatching { repo.deleteEvent(profile, event) }
+                            pendingDeleteEvent = null
+                            if (result.isSuccess) {
+                                if (editingEvent?.id == event.id) {
+                                    editingEvent = null
+                                    editingDate = null
+                                    validationError = null
+                                }
+                            } else {
+                                validationError = result.exceptionOrNull()?.message
+                                    ?: "Unable to delete event"
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDeleteEvent = null }) { Text("Cancel") }
+            }
+        )
+    }
+
     if (showMonthOverview) {
         val monthTitle = "${currentYearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentYearMonth.year}"
         AlertDialog(
@@ -472,7 +535,10 @@ fun CalendarScreen(
                                 EventCard(
                                     event = event,
                                     defaultColor = defaultEventColor,
-                                    onEditColor = { selected -> colorPickerTarget = selected }
+                                    onEventClick = { selected ->
+                                        showMonthOverview = false
+                                        beginEditEvent(selected)
+                                    }
                                 )
                             }
                             Spacer(Modifier.height(12.dp))
@@ -669,7 +735,7 @@ private fun DaySchedule(
     date: LocalDate,
     events: List<Event>,
     defaultEventColor: Color,
-    onEditColor: (Event) -> Unit
+    onEventClick: (Event) -> Unit
 ) {
     val zone = remember { ZoneId.systemDefault() }
     val eventSpans = remember(events, date) {
@@ -755,7 +821,7 @@ private fun DaySchedule(
                         Box(
                             modifier = baseModifier
                                 .background(eventColor.copy(alpha = 0.9f))
-                                .clickable { onEditColor(event) }
+                                .clickable { onEventClick(event) }
                                 .padding(10.dp),
                             contentAlignment = Alignment.TopStart
                         ) {
@@ -802,7 +868,7 @@ private fun EventCard(
     event: Event,
     defaultColor: Color,
     modifier: Modifier = Modifier,
-    onEditColor: (Event) -> Unit = {}
+    onEventClick: (Event) -> Unit = {}
 ) {
     val eventColor = eventColor(event, defaultColor)
     val accent = eventColor.copy(alpha = 0.2f)
@@ -812,7 +878,7 @@ private fun EventCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        onClick = { onEditColor(event) },
+        onClick = { onEventClick(event) },
         colors = CardDefaults.cardColors(containerColor = accent)
     ) {
         Column(Modifier.padding(12.dp)) {

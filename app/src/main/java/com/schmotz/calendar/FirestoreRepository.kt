@@ -91,4 +91,14 @@ class FirestoreRepository(
         val id = if (event.id.isBlank()) collection.document().id else event.id
         collection.document(id).set(event.copy(id = id)).await()
     }
+
+    suspend fun deleteEvent(profile: UserProfile, event: Event) {
+        if (profile.householdCode.isBlank() || event.id.isBlank()) return
+        db.collection(HOUSEHOLDS)
+            .document(profile.householdCode)
+            .collection(EVENTS)
+            .document(event.id)
+            .delete()
+            .await()
+    }
 }

@@ -25,11 +25,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -65,8 +67,24 @@ fun LinksScreen(
 
 @Composable
 fun LinkCard(link: SharedLink) {
+    val uriHandler = LocalUriHandler.current
+    val targetUrl = remember(link.url) {
+        val trimmed = link.url.trim()
+        when {
+            trimmed.startsWith("http://", ignoreCase = true) -> trimmed
+            trimmed.startsWith("https://", ignoreCase = true) -> trimmed
+            trimmed.isBlank() -> trimmed
+            else -> "https://$trimmed"
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            if (targetUrl.isNotBlank()) {
+                runCatching { uriHandler.openUri(targetUrl) }
+            }
+        },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(Modifier.padding(16.dp)) {
