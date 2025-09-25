@@ -31,3 +31,4 @@ Add security rules to restrict access; simplest approach is to check that a user
 - Thumbnails come from Open Graph tags; some platforms block scraping. The link still saves even without a thumbnail.
 - You can change the shared access code anytime in **Settings**.
 - The app label is **Schmotz Calender**.
+- The Gradle wrapper expects `gradle/wrapper/gradle-9.0-milestone-1-bin.zip` to exist locally. Download it once from <https://services.gradle.org/distributions/> and copy it next to `gradle-wrapper.jar` before running the wrapper offline.

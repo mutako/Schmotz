@@ -1,23 +1,39 @@
 package com.schmotz.calendar
 
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.material3.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    repo: Repo,
-    profile: UserProfile
+    repo: FirestoreRepository,
+    profile: UserProfile,
+    onSignOut: () -> Unit
 ) {
     var tab by rememberSaveable { mutableStateOf(0) }
-    val tabs = listOf("Calendar", "Upcoming", "Search")
+    val tabs = listOf("Calendar", "Upcoming", "Links", "Search")
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Schmotz Calendar") })
+            TopAppBar(
+                title = { Text("Schmotz Calendar") },
+                actions = {
+                    TextButton(onClick = onSignOut) { Text("Sign out") }
+                }
+            )
         }
     ) { padding ->
         Column(Modifier.padding(padding)) {
@@ -29,7 +45,8 @@ fun HomeScreen(
             when (tab) {
                 0 -> CalendarScreen(repo = repo, profile = profile)
                 1 -> UpcomingScreen(repo = repo, profile = profile)
-                2 -> SearchScreen(repo = repo, profile = profile)
+                2 -> LinksScreen(repo = repo, profile = profile)
+                else -> SearchScreen(repo = repo, profile = profile)
             }
         }
     }
