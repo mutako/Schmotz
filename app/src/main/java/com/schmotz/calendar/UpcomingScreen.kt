@@ -31,6 +31,7 @@ fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
     val nowMillis = System.currentTimeMillis()
     val upcoming = all
+        .distinctBy { it.id }
         .filter { event -> event.endEpochMillis >= nowMillis }
         .sortedBy { it.startEpochMillis }
 

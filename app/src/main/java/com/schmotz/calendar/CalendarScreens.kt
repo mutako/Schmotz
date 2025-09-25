@@ -9,6 +9,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,10 +22,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -56,13 +57,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.IntOffset
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Instant
@@ -74,9 +72,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import java.time.temporal.ChronoUnit
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * Visual month calendar with:
@@ -674,117 +669,125 @@ private fun DaySchedule(
     onEditColor: (Event) -> Unit
 ) {
     val zone = remember { ZoneId.systemDefault() }
-    val density = LocalDensity.current
-    val scrollState = rememberScrollState()
-    val rowHeight = 44.dp
-    val rowHeightPx = with(density) { rowHeight.toPx() }
-    Column(
+    val eventSpans = remember(events, date) {
+        events.mapNotNull { event ->
+            eventSpanWithinDay(event, date, zone)?.let { span -> event to span }
+        }
+    }
+    val rowHeight = 48.dp
+    val outline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+    val emptyBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 420.dp)
-            .verticalScroll(scrollState)
+            .heightIn(max = 420.dp),
+        contentPadding = PaddingValues(vertical = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(rowHeight * 24),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Column(modifier = Modifier.width(64.dp)) {
-                repeat(24) { hour ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(rowHeight),
-                        contentAlignment = Alignment.TopStart
-                    ) {
-                        Text(
-                            text = String.format(Locale.getDefault(), "%02d:00", hour),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(rowHeight * 24)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
-            ) {
-                Column(Modifier.fillMaxSize()) {
-                    repeat(24) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(rowHeight)
-                        ) {
-                            Divider(
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .fillMaxWidth(),
-                                thickness = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
-                }
-
-                if (events.isEmpty()) {
+        if (eventSpans.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
                         text = "No events yet.",
-                        modifier = Modifier.align(Alignment.Center),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                } else {
-                    events.sortedBy { it.startEpochMillis }.forEach { event ->
-                        val span = eventSpanWithinDay(event, date, zone) ?: return@forEach
-                        val (startMinutes, endMinutes) = span
-                        val availableMinutes = 24 * 60 - startMinutes
-                        val minimumMinutes = if (event.allDay) availableMinutes else min(30, availableMinutes)
-                        val minutesLength = max(endMinutes - startMinutes, minimumMinutes)
-                        val topPx = rowHeightPx * (startMinutes / 60f)
-                        val blockHeightPx = rowHeightPx * (minutesLength / 60f)
-                        val blockHeightDp = with(density) { blockHeightPx.toDp() }
+                }
+            }
+        }
 
+        items(24) { hour ->
+            val rowStart = hour * 60
+            val rowEnd = rowStart + 60
+            val covering = eventSpans.filter { (_, span) ->
+                span.first < rowEnd && span.second > rowStart
+            }
+            val primary = covering.minByOrNull { it.second.first }
+            val isStartHour = primary?.second?.let { span ->
+                span.first in rowStart until rowEnd
+            } ?: false
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(rowHeight)
+                    .padding(vertical = 2.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(64.dp)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.TopStart
+                ) {
+                    Text(
+                        text = String.format(Locale.getDefault(), "%02d:00", hour),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    val baseModifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, outline, RoundedCornerShape(12.dp))
+
+                    if (primary == null) {
+                        Box(baseModifier.background(emptyBackground))
+                    } else {
+                        val event = primary.first
                         val eventColor = eventColor(event, defaultEventColor)
                         val textColor = contrastingTextColor(eventColor)
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .offset { IntOffset(0, topPx.roundToInt()) }
-                                .padding(horizontal = 6.dp)
+                            modifier = baseModifier
+                                .background(eventColor.copy(alpha = 0.9f))
+                                .clickable { onEditColor(event) }
+                                .padding(10.dp),
+                            contentAlignment = Alignment.TopStart
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(blockHeightDp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(eventColor)
-                                    .clickable { onEditColor(event) }
-                                    .padding(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                Text(
-                                    event.title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = textColor,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    formatEventTimeRangeShort(event, zone),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = textColor.copy(alpha = 0.9f)
-                                )
+                            if (isStartHour) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        text = event.title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = textColor,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = formatEventTimeRangeShort(event, zone),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = textColor.copy(alpha = 0.9f)
+                                    )
+                                    if (covering.size > 1) {
+                                        Text(
+                                            text = "+${covering.size - 1} more",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = textColor.copy(alpha = 0.8f)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
+
+                    Divider(
+                        modifier = Modifier.align(Alignment.BottomStart),
+                        thickness = 0.5.dp,
+                        color = outline
+                    )
                 }
             }
         }
