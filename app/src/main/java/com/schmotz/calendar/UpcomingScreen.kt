@@ -18,9 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -28,15 +26,13 @@ import java.util.Locale
 fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
     val household = profile.householdCode.ifBlank { "FAMILY" }
     val all by repo.observeAllEvents(household).collectAsState(initial = emptyList())
-    val today = LocalDate.now()
-    val currentMonth = YearMonth.from(today)
     val zone = remember { ZoneId.systemDefault() }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()) }
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
-    val upcoming = all.filter {
-        val d = FirestoreRepository.millisToLocalDate(it.startEpochMillis)
-        !d.isBefore(today) && YearMonth.from(d) == currentMonth
-    }.sortedBy { it.startEpochMillis }
+    val nowMillis = System.currentTimeMillis()
+    val upcoming = all
+        .filter { event -> event.endEpochMillis >= nowMillis }
+        .sortedBy { it.startEpochMillis }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
         Text("Upcoming", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -47,7 +43,7 @@ fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
                     .padding(top = 24.dp),
                 verticalArrangement = Arrangement.Top
             ) {
-                Text("No more events scheduled for this month yet.", style = MaterialTheme.typography.bodyMedium)
+                Text("No upcoming events yet.", style = MaterialTheme.typography.bodyMedium)
             }
         } else {
             LazyColumn(

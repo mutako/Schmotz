@@ -1,6 +1,7 @@
 package com.schmotz.calendar
 
 import android.app.TimePickerDialog
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,9 +33,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -509,6 +512,7 @@ private fun WeekdayHeader(firstDayOfWeek: DayOfWeek) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MonthGrid(
     yearMonth: YearMonth,
@@ -521,73 +525,76 @@ private fun MonthGrid(
 ) {
     val cells = remember(yearMonth, firstDayOfWeek) { buildMonthCells(yearMonth, firstDayOfWeek) }
 
-    Column {
-        cells.chunked(7).forEach { week ->
-            Row(Modifier.fillMaxWidth()) {
-                week.forEach { date ->
-                    val isToday = date == today
-                    val isSelected = date == selectedDate
-                    val withinMonth = date.month == yearMonth.month
-                    val eventsForDay = eventsByDate[date].orEmpty()
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(7),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        items(cells) { cell ->
+            if (cell == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(96.dp)
+                )
+            } else {
+                val isToday = cell == today
+                val isSelected = cell == selectedDate
+                val eventsForDay = eventsByDate[cell].orEmpty()
 
-                    val bg = when {
-                        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        isToday -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-                        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (withinMonth) 0.08f else 0.03f)
-                    }
-                    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                val bg = when {
+                    isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    isToday -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.08f)
+                }
+                val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
 
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .padding(2.dp)
-                            .clip(MaterialTheme.shapes.small)
-                            .background(bg)
-                            .border(
-                                width = if (isSelected) 2.dp else 1.dp,
-                                color = borderColor,
-                                shape = MaterialTheme.shapes.small
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 96.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(bg)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = borderColor,
+                            shape = MaterialTheme.shapes.small
+                        )
+                        .clickable { onSelect(cell) }
+                        .padding(6.dp)
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        Row(Modifier.fillMaxWidth()) {
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                text = cell.dayOfMonth.toString(),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-                            .clickable { onSelect(date) },
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(4.dp)
-                        ) {
-                            Row(Modifier.fillMaxWidth()) {
-                                Spacer(Modifier.weight(1f))
+                        }
+                        if (eventsForDay.isNotEmpty()) {
+                            Spacer(Modifier.height(4.dp))
+                        }
+                        eventsForDay.take(3).forEach { event ->
+                            val eventColor = eventColor(event, defaultEventColor)
+                            val labelColor = contrastingTextColor(eventColor)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 2.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(eventColor),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
                                 Text(
-                                    text = date.dayOfMonth.toString(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (withinMonth) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    text = event.title,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = labelColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                            }
-                            if (eventsForDay.isNotEmpty()) {
-                                Spacer(Modifier.height(2.dp))
-                            }
-                            eventsForDay.take(3).forEach { event ->
-                                val eventColor = eventColor(event, defaultEventColor)
-                                val labelColor = contrastingTextColor(eventColor)
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 2.dp)
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(eventColor),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Text(
-                                        text = event.title,
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = labelColor,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
                             }
                         }
                     }
@@ -600,14 +607,14 @@ private fun MonthGrid(
 private fun buildMonthCells(
     yearMonth: YearMonth,
     firstDayOfWeek: DayOfWeek
-): List<LocalDate> {
+): List<LocalDate?> {
     val firstOfMonth = yearMonth.atDay(1)
-    var firstCell = firstOfMonth
-    while (firstCell.dayOfWeek != firstDayOfWeek) {
-        firstCell = firstCell.minusDays(1)
-    }
-    // Keep a stable grid (6 rows × 7 days)
-    return (0 until 42).map { firstCell.plusDays(it.toLong()) }
+    val daysInMonth = yearMonth.lengthOfMonth()
+    val leadingEmpty = ((firstOfMonth.dayOfWeek.value - firstDayOfWeek.value + 7) % 7)
+    val dates = (1..daysInMonth).map { day -> yearMonth.atDay(day) }
+    val trailingEmpty = (7 - (leadingEmpty + daysInMonth) % 7) % 7
+
+    return List(leadingEmpty) { null } + dates + List(trailingEmpty) { null }
 }
 
 @Composable
@@ -671,16 +678,6 @@ private fun DaySchedule(
     val scrollState = rememberScrollState()
     val rowHeight = 44.dp
     val rowHeightPx = with(density) { rowHeight.toPx() }
-
-    if (events.isEmpty()) {
-        Text(
-            "No events yet.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        return
-    }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -736,47 +733,56 @@ private fun DaySchedule(
                     }
                 }
 
-                events.sortedBy { it.startEpochMillis }.forEach { event ->
-                    val span = eventSpanWithinDay(event, date, zone) ?: return@forEach
-                    val (startMinutes, endMinutes) = span
-                    val availableMinutes = 24 * 60 - startMinutes
-                    val minimumMinutes = if (event.allDay) availableMinutes else min(30, availableMinutes)
-                    val minutesLength = max(endMinutes - startMinutes, minimumMinutes)
-                    val topPx = rowHeightPx * (startMinutes / 60f)
-                    val blockHeightPx = rowHeightPx * (minutesLength / 60f)
-                    val blockHeightDp = with(density) { blockHeightPx.toDp() }
+                if (events.isEmpty()) {
+                    Text(
+                        text = "No events yet.",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    events.sortedBy { it.startEpochMillis }.forEach { event ->
+                        val span = eventSpanWithinDay(event, date, zone) ?: return@forEach
+                        val (startMinutes, endMinutes) = span
+                        val availableMinutes = 24 * 60 - startMinutes
+                        val minimumMinutes = if (event.allDay) availableMinutes else min(30, availableMinutes)
+                        val minutesLength = max(endMinutes - startMinutes, minimumMinutes)
+                        val topPx = rowHeightPx * (startMinutes / 60f)
+                        val blockHeightPx = rowHeightPx * (minutesLength / 60f)
+                        val blockHeightDp = with(density) { blockHeightPx.toDp() }
 
-                    val eventColor = eventColor(event, defaultEventColor)
-                    val textColor = contrastingTextColor(eventColor)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .offset { IntOffset(0, topPx.roundToInt()) }
-                            .padding(horizontal = 6.dp)
-                    ) {
-                        Column(
+                        val eventColor = eventColor(event, defaultEventColor)
+                        val textColor = contrastingTextColor(eventColor)
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(blockHeightDp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(eventColor)
-                                .clickable { onEditColor(event) }
-                                .padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                                .offset { IntOffset(0, topPx.roundToInt()) }
+                                .padding(horizontal = 6.dp)
                         ) {
-                            Text(
-                                event.title,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = textColor,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                formatEventTimeRangeShort(event, zone),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = textColor.copy(alpha = 0.9f)
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(blockHeightDp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(eventColor)
+                                    .clickable { onEditColor(event) }
+                                    .padding(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    event.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textColor,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    formatEventTimeRangeShort(event, zone),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = textColor.copy(alpha = 0.9f)
+                                )
+                            }
                         }
                     }
                 }
