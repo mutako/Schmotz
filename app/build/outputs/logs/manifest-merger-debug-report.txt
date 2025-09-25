@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-41:12
-INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-41:12
-INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-41:12
-INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-41:12
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-40:12
+INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-40:12
+INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-40:12
+INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:1-40:12
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\a0e84c1d5f2acadb29f581242253ab6c\transformed\material-1.12.0\AndroidManifest.xml:17:1-24:12
 MERGED from [io.coil-kt:coil-compose:2.6.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\a58623f07b3e15f43493cb2e27f9b178\transformed\jetified-coil-compose-2.6.0\AndroidManifest.xml:2:1-7:12
 MERGED from [io.coil-kt:coil-compose-base:2.6.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\13b405ab7505a29c8737dd5cea5086f5\transformed\jetified-coil-compose-base-2.6.0\AndroidManifest.xml:2:1-7:12
@@ -114,17 +114,16 @@ MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\carha\.gradle\
 MERGED from [io.grpc:grpc-android:1.62.2] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1894bad762582a1b8afa33bd134416ab\transformed\jetified-grpc-android-1.62.2\AndroidManifest.xml:2:1-9:12
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\f4fa513ff1e3172e08543e42c5eaf4dc\transformed\jetified-protolite-well-known-types-18.0.0\AndroidManifest.xml:2:1-11:12
 	package
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:11-41
 		INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml
 	android:versionName
 		INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml
 	android:versionCode
 		INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:3:5-63
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:2:11-69
 application
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:5:5-39:19
-INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:5:5-39:19
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:4:5-38:19
+INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:4:5-38:19
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\a0e84c1d5f2acadb29f581242253ab6c\transformed\material-1.12.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\a0e84c1d5f2acadb29f581242253ab6c\transformed\material-1.12.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\11b97bb4e0bf84dcfbe4e13594386eae\transformed\constraintlayout-2.0.1\AndroidManifest.xml:9:5-20
@@ -178,59 +177,59 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\carha\.gradle\cach
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.1] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1854fa837562be26bf514a9b5a911fd7\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:9:9-35
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:8:9-35
 	android:label
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:7:9-41
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:6:9-41
 	android:icon
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:8:9-43
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:7:9-43
 	android:allowBackup
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:6:9-35
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:5:9-35
 	android:theme
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:10:9-53
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:9:9-53
 activity#com.schmotz.calendar.MainActivity
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:12:9-19:20
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:11:9-18:20
 	android:exported
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:14:13-36
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:13:13-36
 	android:name
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:13:13-41
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:12:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:15:13-18:29
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:14:13-17:29
 action#android.intent.action.MAIN
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:17-68
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:15:17-68
 	android:name
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:25-66
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:15:25-66
 category#android.intent.category.LAUNCHER
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:17:17-76
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:17-76
 	android:name
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:17:27-74
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:27-74
 activity#com.schmotz.calendar.ShareActivity
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:22:9-38:20
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:21:9-37:20
 	android:excludeFromRecents
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:26:13-46
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:25:13-46
 	android:exported
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:24:13-36
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:23:13-36
 	android:theme
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:27:13-57
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:26:13-57
 	android:taskAffinity
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:25:13-36
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:24:13-36
 	android:name
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:23:13-42
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:22:13-42
 intent-filter#action:name:android.intent.action.SEND+category:name:android.intent.category.DEFAULT+data:mimeType:text/plain
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:13-32:29
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:27:13-31:29
 action#android.intent.action.SEND
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-68
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:17-68
 	android:name
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:25-66
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:25-66
 category#android.intent.category.DEFAULT
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-75
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-75
 	android:name
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:27-73
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:27-73
 data
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:17-54
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-54
 	android:mimeType
-		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:23-52
+		ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:23-52
 intent-filter#action:name:android.intent.action.SEND+category:name:android.intent.category.DEFAULT+data:mimeType:text/*
-ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:33:13-37:29
+ADDED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:32:13-36:29
 uses-sdk
 INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml

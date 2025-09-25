@@ -30,80 +30,80 @@
 19-->[androidx.core:core:1.13.1] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1854fa837562be26bf514a9b5a911fd7\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
 20
 21    <application
-21-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:5:5-39:19
+21-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:4:5-38:19
 22        android:allowBackup="true"
-22-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:6:9-35
+22-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:5:9-35
 23        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 23-->[androidx.core:core:1.13.1] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1854fa837562be26bf514a9b5a911fd7\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 24        android:debuggable="true"
 25        android:extractNativeLibs="false"
 26        android:icon="@mipmap/ic_launcher"
-26-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:8:9-43
+26-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:7:9-43
 27        android:label="Schmotz Calender"
-27-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:7:9-41
+27-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:6:9-41
 28        android:supportsRtl="true"
-28-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:9:9-35
+28-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:8:9-35
 29        android:testOnly="true"
 30        android:theme="@style/Theme.SchmotzCalendar" >
-30-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:10:9-53
+30-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:9:9-53
 31        <activity
-31-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:12:9-19:20
+31-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:11:9-18:20
 32            android:name="com.schmotz.calendar.MainActivity"
-32-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:13:13-41
+32-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:12:13-41
 33            android:exported="true" >
-33-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:14:13-36
+33-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:13:13-36
 34            <intent-filter>
-34-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:15:13-18:29
+34-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:14:13-17:29
 35                <action android:name="android.intent.action.MAIN" />
-35-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:17-68
-35-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:25-66
+35-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:15:17-68
+35-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:15:25-66
 36
 37                <category android:name="android.intent.category.LAUNCHER" />
-37-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:17:17-76
-37-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:17:27-74
+37-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:17-76
+37-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:16:27-74
 38            </intent-filter>
 39        </activity>
 40
 41        <!-- Receives "Share" from other apps (Instagram, Facebook, browser, etc.) -->
 42        <activity
-42-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:22:9-38:20
+42-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:21:9-37:20
 43            android:name="com.schmotz.calendar.ShareActivity"
-43-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:23:13-42
+43-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:22:13-42
 44            android:excludeFromRecents="true"
-44-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:26:13-46
+44-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:25:13-46
 45            android:exported="true"
-45-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:24:13-36
+45-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:23:13-36
 46            android:taskAffinity=""
-46-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:25:13-36
+46-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:24:13-36
 47            android:theme="@style/Theme.SchmotzCalendar" >
-47-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:27:13-57
+47-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:26:13-57
 48            <intent-filter>
-48-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:13-32:29
+48-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:27:13-31:29
 49                <action android:name="android.intent.action.SEND" />
-49-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-68
-49-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:25-66
+49-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:17-68
+49-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:25-66
 50
 51                <category android:name="android.intent.category.DEFAULT" />
-51-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-75
-51-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:27-73
+51-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-75
+51-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:27-73
 52
 53                <data android:mimeType="text/plain" />
-53-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:17-54
-53-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:23-52
+53-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-54
+53-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:23-52
 54            </intent-filter>
 55            <intent-filter>
-55-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:33:13-37:29
+55-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:32:13-36:29
 56                <action android:name="android.intent.action.SEND" />
-56-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-68
-56-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:25-66
+56-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:17-68
+56-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:28:25-66
 57
 58                <category android:name="android.intent.category.DEFAULT" />
-58-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-75
-58-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:27-73
+58-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-75
+58-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:27-73
 59
 60                <data android:mimeType="text/*" />
-60-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:17-54
-60-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:23-52
+60-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-54
+60-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:23-52
 61            </intent-filter>
 62        </activity>
 63
@@ -178,14 +178,14 @@
 98-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5281837196fcf353ea4f5c3ad9c9ca9f\transformed\jetified-firebase-auth-23.0.0\AndroidManifest.xml:36:25-66
 99
 100                <category android:name="android.intent.category.DEFAULT" />
-100-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-75
-100-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:27-73
+100-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-75
+100-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:27-73
 101                <category android:name="android.intent.category.BROWSABLE" />
 101-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5281837196fcf353ea4f5c3ad9c9ca9f\transformed\jetified-firebase-auth-23.0.0\AndroidManifest.xml:39:17-78
 101-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5281837196fcf353ea4f5c3ad9c9ca9f\transformed\jetified-firebase-auth-23.0.0\AndroidManifest.xml:39:27-75
 102
 103                <data
-103-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:17-54
+103-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-54
 104                    android:host="firebase.auth"
 105                    android:path="/"
 106                    android:scheme="genericidp" />
@@ -210,14 +210,14 @@
 116-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5281837196fcf353ea4f5c3ad9c9ca9f\transformed\jetified-firebase-auth-23.0.0\AndroidManifest.xml:36:25-66
 117
 118                <category android:name="android.intent.category.DEFAULT" />
-118-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-75
-118-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:27-73
+118-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:17-75
+118-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:29:27-73
 119                <category android:name="android.intent.category.BROWSABLE" />
 119-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5281837196fcf353ea4f5c3ad9c9ca9f\transformed\jetified-firebase-auth-23.0.0\AndroidManifest.xml:39:17-78
 119-->[com.google.firebase:firebase-auth:23.0.0] C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5281837196fcf353ea4f5c3ad9c9ca9f\transformed\jetified-firebase-auth-23.0.0\AndroidManifest.xml:39:27-75
 120
 121                <data
-121-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:31:17-54
+121-->H:\SOFTWARE\Schmotz Calender\app\src\main\AndroidManifest.xml:30:17-54
 122                    android:host="firebase.auth"
 123                    android:path="/"
 124                    android:scheme="recaptcha" />
