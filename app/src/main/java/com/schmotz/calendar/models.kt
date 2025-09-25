@@ -16,7 +16,8 @@ data class Event(
     val notes: String? = null,
     val personTag: String? = null,
     val allDay: Boolean = false,
-    val repeatFrequency: RepeatFrequency = RepeatFrequency.NONE
+    val repeatFrequency: RepeatFrequency = RepeatFrequency.NONE,
+    val colorArgb: Long = 0L
 ) : Serializable
 
 enum class RepeatFrequency : Serializable {

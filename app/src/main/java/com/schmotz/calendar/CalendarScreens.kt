@@ -4,8 +4,11 @@ import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,13 +17,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -48,7 +55,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Instant
@@ -90,6 +101,20 @@ fun CalendarScreen(
         }
         .sortedBy { it.key }
 
+    val colorScheme = MaterialTheme.colorScheme
+    val defaultEventColor = colorScheme.primary
+    val eventColorChoices = remember(colorScheme) {
+        listOf(
+            colorScheme.primary,
+            colorScheme.secondary,
+            colorScheme.tertiary,
+            colorScheme.inversePrimary,
+            colorScheme.error,
+            Color(0xFF00897B),
+            Color(0xFF6D4C41)
+        )
+    }
+
     var overviewDate by remember { mutableStateOf<LocalDate?>(null) }
     var editingDate by remember { mutableStateOf<LocalDate?>(null) }
     var newTitle by remember { mutableStateOf("") }
@@ -100,9 +125,11 @@ fun CalendarScreen(
     var validationError by remember { mutableStateOf<String?>(null) }
     var showRepeatChooser by remember { mutableStateOf(false) }
     var showMonthOverview by remember { mutableStateOf(false) }
+    var selectedColorInt by remember { mutableStateOf(0) }
+    var colorPickerTarget by remember { mutableStateOf<Event?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val timeFormatter = remember { DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()) }
+    val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE, MMM d", Locale.getDefault()) }
 
     fun beginCreateEvent(forDate: LocalDate) {
@@ -113,6 +140,7 @@ fun CalendarScreen(
         endTime = LocalTime.of(10, 0)
         repeatFrequency = RepeatFrequency.NONE
         validationError = null
+        selectedColorInt = defaultEventColor.toArgb()
     }
 
     fun showTimePicker(initial: LocalTime, onTimeSelected: (LocalTime) -> Unit) {
@@ -121,7 +149,7 @@ fun CalendarScreen(
             { _, hour, minute -> onTimeSelected(LocalTime.of(hour, minute)) },
             initial.hour,
             initial.minute,
-            false
+            true
         ).show()
     }
 
@@ -157,6 +185,8 @@ fun CalendarScreen(
             firstDayOfWeek = firstDayOfWeek,
             selectedDate = selectedDate,
             today = today,
+            eventsByDate = eventsByDate,
+            defaultEventColor = defaultEventColor,
             onSelect = { date ->
                 selectedDate = date
                 val dayEvents = eventsByDate[date].orEmpty()
@@ -180,13 +210,12 @@ fun CalendarScreen(
         Spacer(Modifier.height(8.dp))
 
         val dayEvents = eventsByDate[selectedDate].orEmpty()
-        if (dayEvents.isEmpty()) {
-            Text("No events yet.")
-        } else {
-            LazyColumn {
-                items(dayEvents) { ev -> EventCard(ev) }
-            }
-        }
+        DaySchedule(
+            date = selectedDate,
+            events = dayEvents,
+            defaultEventColor = defaultEventColor,
+            onEditColor = { event -> colorPickerTarget = event }
+        )
     }
 
     overviewDate?.let { date ->
@@ -200,7 +229,11 @@ fun CalendarScreen(
                 } else {
                     Column(Modifier.heightIn(max = 320.dp)) {
                         dayEvents.forEach { event ->
-                            EventCard(event)
+                            EventCard(
+                                event = event,
+                                defaultColor = defaultEventColor,
+                                onEditColor = { selected -> colorPickerTarget = selected }
+                            )
                         }
                     }
                 }
@@ -264,6 +297,14 @@ fun CalendarScreen(
                         }
                     }
                     Spacer(Modifier.height(12.dp))
+                    Text("Color", style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.height(4.dp))
+                    ColorPickerRow(
+                        colors = eventColorChoices,
+                        selectedColorInt = selectedColorInt,
+                        onSelect = { selectedColorInt = it }
+                    )
+                    Spacer(Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             checked = repeatFrequency != RepeatFrequency.NONE,
@@ -311,6 +352,7 @@ fun CalendarScreen(
                         }
                         date.atTimeMillis(startTime) to date.atTimeMillis(endTime)
                     }
+                    val chosenColorInt = if (selectedColorInt == 0) defaultEventColor.toArgb() else selectedColorInt
                     validationError = null
                     scope.launch {
                         runCatching {
@@ -320,7 +362,8 @@ fun CalendarScreen(
                                 startEpochMillis = startMillis,
                                 endEpochMillis = endMillis,
                                 allDay = isAllDay,
-                                repeatFrequency = repeatFrequency
+                                repeatFrequency = repeatFrequency,
+                                colorArgb = colorIntToLong(chosenColorInt)
                             )
                             repo.upsertEvent(profile, event)
                         }.onSuccess {
@@ -335,6 +378,32 @@ fun CalendarScreen(
             },
             dismissButton = {
                 TextButton(onClick = { editingDate = null }) { Text("Cancel") }
+            }
+        )
+    }
+
+    colorPickerTarget?.let { target ->
+        val initialSelection = eventColorInt(target, defaultEventColor)
+        AlertDialog(
+            onDismissRequest = { colorPickerTarget = null },
+            title = { Text("Choose event color") },
+            text = {
+                ColorPickerRow(
+                    colors = eventColorChoices,
+                    selectedColorInt = initialSelection,
+                    onSelect = { chosen ->
+                        scope.launch {
+                            repo.upsertEvent(
+                                profile,
+                                target.copy(colorArgb = colorIntToLong(chosen))
+                            )
+                            colorPickerTarget = null
+                        }
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { colorPickerTarget = null }) { Text("Close") }
             }
         )
     }
@@ -391,7 +460,11 @@ fun CalendarScreen(
                             )
                             Spacer(Modifier.height(4.dp))
                             eventsForDay.forEach { event ->
-                                EventCard(event)
+                                EventCard(
+                                    event = event,
+                                    defaultColor = defaultEventColor,
+                                    onEditColor = { selected -> colorPickerTarget = selected }
+                                )
                             }
                             Spacer(Modifier.height(12.dp))
                         }
@@ -434,6 +507,8 @@ private fun MonthGrid(
     firstDayOfWeek: DayOfWeek,
     selectedDate: LocalDate,
     today: LocalDate,
+    eventsByDate: Map<LocalDate, List<Event>>,
+    defaultEventColor: Color,
     onSelect: (LocalDate) -> Unit
 ) {
     val cells = remember(yearMonth, firstDayOfWeek) { buildMonthCells(yearMonth, firstDayOfWeek) }
@@ -445,6 +520,7 @@ private fun MonthGrid(
                     val isToday = date == today
                     val isSelected = date == selectedDate
                     val withinMonth = date.month == yearMonth.month
+                    val eventsForDay = eventsByDate[date].orEmpty()
 
                     val bg = when {
                         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -466,15 +542,46 @@ private fun MonthGrid(
                                 shape = MaterialTheme.shapes.small
                             )
                             .clickable { onSelect(date) },
-                        contentAlignment = Alignment.TopEnd
                     ) {
-                        Text(
-                            text = date.dayOfMonth.toString(),
-                            modifier = Modifier.padding(6.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (withinMonth) MaterialTheme.colorScheme.onSurface
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(4.dp)
+                        ) {
+                            Row(Modifier.fillMaxWidth()) {
+                                Spacer(Modifier.weight(1f))
+                                Text(
+                                    text = date.dayOfMonth.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (withinMonth) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                )
+                            }
+                            if (eventsForDay.isNotEmpty()) {
+                                Spacer(Modifier.height(2.dp))
+                            }
+                            eventsForDay.take(3).forEach { event ->
+                                val eventColor = eventColor(event, defaultEventColor)
+                                val labelColor = contrastingTextColor(eventColor)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 2.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(eventColor),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Text(
+                                        text = event.title,
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = labelColor,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -496,15 +603,169 @@ private fun buildMonthCells(
 }
 
 @Composable
-private fun EventCard(event: Event) {
-    Card(
+private fun ColorPickerRow(
+    colors: List<Color>,
+    selectedColorInt: Int,
+    onSelect: (Int) -> Unit
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        colors.forEach { color ->
+            val colorInt = color.toArgb()
+            ColorSwatch(
+                color = color,
+                isSelected = colorInt == selectedColorInt,
+                onClick = { onSelect(colorInt) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorSwatch(
+    color: Color,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val outlineColor = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outlineVariant
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .border(width = if (isSelected) 3.dp else 1.dp, color = outlineColor, shape = CircleShape)
+            .background(color)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                tint = contrastingTextColor(color)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DaySchedule(
+    date: LocalDate,
+    events: List<Event>,
+    defaultEventColor: Color,
+    onEditColor: (Event) -> Unit
+) {
+    val zone = remember { ZoneId.systemDefault() }
+    val rowHeight = 44.dp
+
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        if (events.isEmpty()) {
+            item {
+                Text(
+                    "No events scheduled yet for this day.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        items(24) { hour ->
+            val eventsForHour = events.filter { event ->
+                eventCoversHour(event, date, hour, zone)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = String.format(Locale.getDefault(), "%02d:00", hour),
+                    modifier = Modifier.width(64.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Column(Modifier.weight(1f)) {
+                    if (eventsForHour.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(rowHeight)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        )
+                    } else {
+                        eventsForHour.forEach { event ->
+                            val eventColor = eventColor(event, defaultEventColor)
+                            val textColor = contrastingTextColor(eventColor)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(eventColor)
+                                    .clickable { onEditColor(event) }
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    event.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textColor
+                                )
+                                val detail = if (event.allDay) {
+                                    "All day"
+                                } else {
+                                    formatEventTimeRangeShort(event, zone)
+                                }
+                                Text(
+                                    detail,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = textColor.copy(alpha = 0.85f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EventCard(
+    event: Event,
+    defaultColor: Color,
+    modifier: Modifier = Modifier,
+    onEditColor: (Event) -> Unit = {}
+) {
+    val eventColor = eventColor(event, defaultColor)
+    val accent = eventColor.copy(alpha = 0.2f)
+    val indicatorColor = eventColor
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        onClick = { onEditColor(event) },
+        colors = CardDefaults.cardColors(containerColor = accent)
     ) {
         Column(Modifier.padding(12.dp)) {
-            Text(event.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clip(CircleShape)
+                        .background(indicatorColor)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(event.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            }
             Spacer(Modifier.height(4.dp))
             Text(
                 formatEventTimeRange(event),
@@ -532,7 +793,7 @@ private fun formatEventTimeRange(event: Event): String {
     val start = Instant.ofEpochMilli(event.startEpochMillis).atZone(zone)
     val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
     val dateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault())
-    val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault())
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
 
     if (event.allDay) {
         val date = start.toLocalDate().format(dateFormatter)
@@ -550,3 +811,45 @@ private fun formatEventTimeRange(event: Event): String {
         "$startText → $endText"
     }
 }
+
+private fun formatEventTimeRangeShort(event: Event, zone: ZoneId): String {
+    if (event.allDay) return "All day"
+    val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    val start = Instant.ofEpochMilli(event.startEpochMillis).atZone(zone)
+    val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
+    val startText = start.toLocalTime().format(formatter)
+    val endText = end.toLocalTime().format(formatter)
+    return "$startText – $endText"
+}
+
+private fun eventCoversHour(event: Event, date: LocalDate, hour: Int, zone: ZoneId): Boolean {
+    if (event.allDay) return true
+    if (hour !in 0..23) return false
+
+    val start = Instant.ofEpochMilli(event.startEpochMillis).atZone(zone)
+    val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
+
+    if (start.toLocalDate() != date) return false
+
+    val startHour = start.hour
+    val inclusiveEndHour = when {
+        end.toLocalDate().isAfter(start.toLocalDate()) -> 23
+        else -> maxOf(startHour, end.hour)
+    }
+
+    return hour in startHour..inclusiveEndHour.coerceAtMost(23)
+}
+
+private fun eventColor(event: Event, defaultColor: Color): Color {
+    return if (event.colorArgb != 0L) Color(event.colorArgb.toInt()) else defaultColor
+}
+
+private fun eventColorInt(event: Event, defaultColor: Color): Int {
+    return if (event.colorArgb != 0L) event.colorArgb.toInt() else defaultColor.toArgb()
+}
+
+private fun contrastingTextColor(color: Color): Color {
+    return if (color.luminance() > 0.5f) Color.Black else Color.White
+}
+
+private fun colorIntToLong(colorInt: Int): Long = colorInt.toLong() and 0xFFFFFFFFL
