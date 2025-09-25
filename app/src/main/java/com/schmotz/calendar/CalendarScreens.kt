@@ -8,7 +8,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,8 +18,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,12 +51,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Instant
@@ -70,6 +69,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+import java.time.temporal.ChronoUnit
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * Visual month calendar with:
@@ -210,12 +213,23 @@ fun CalendarScreen(
         Spacer(Modifier.height(8.dp))
 
         val dayEvents = eventsByDate[selectedDate].orEmpty()
-        DaySchedule(
-            date = selectedDate,
-            events = dayEvents,
-            defaultEventColor = defaultEventColor,
-            onEditColor = { event -> colorPickerTarget = event }
-        )
+        if (dayEvents.isEmpty()) {
+            Text(
+                "No events scheduled yet for this day.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                dayEvents.forEach { event ->
+                    EventCard(
+                        event = event,
+                        defaultColor = defaultEventColor,
+                        onEditColor = { selected -> colorPickerTarget = selected }
+                    )
+                }
+            }
+        }
     }
 
     overviewDate?.let { date ->
@@ -224,19 +238,12 @@ fun CalendarScreen(
             onDismissRequest = { overviewDate = null },
             title = { Text(date.format(dateFormatter)) },
             text = {
-                if (dayEvents.isEmpty()) {
-                    Text("No events yet.")
-                } else {
-                    Column(Modifier.heightIn(max = 320.dp)) {
-                        dayEvents.forEach { event ->
-                            EventCard(
-                                event = event,
-                                defaultColor = defaultEventColor,
-                                onEditColor = { selected -> colorPickerTarget = selected }
-                            )
-                        }
-                    }
-                }
+                DaySchedule(
+                    date = date,
+                    events = dayEvents,
+                    defaultEventColor = defaultEventColor,
+                    onEditColor = { event -> colorPickerTarget = event }
+                )
             },
             confirmButton = {
                 TextButton(onClick = { overviewDate = null }) { Text("Close") }
@@ -659,76 +666,116 @@ private fun DaySchedule(
     onEditColor: (Event) -> Unit
 ) {
     val zone = remember { ZoneId.systemDefault() }
+    val density = LocalDensity.current
+    val scrollState = rememberScrollState()
     val rowHeight = 44.dp
+    val rowHeightPx = with(density) { rowHeight.toPx() }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+    if (events.isEmpty()) {
+        Text(
+            "No events yet.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 420.dp)
+            .verticalScroll(scrollState)
     ) {
-        if (events.isEmpty()) {
-            item {
-                Text(
-                    "No events scheduled yet for this day.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(rowHeight * 24),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(modifier = Modifier.width(64.dp)) {
+                repeat(24) { hour ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(rowHeight),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Text(
+                            text = String.format(Locale.getDefault(), "%02d:00", hour),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
-        }
-
-        items(24) { hour ->
-            val eventsForHour = events.filter { event ->
-                eventCoversHour(event, date, hour, zone)
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(rowHeight * 24)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
             ) {
-                Text(
-                    text = String.format(Locale.getDefault(), "%02d:00", hour),
-                    modifier = Modifier.width(64.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Column(Modifier.weight(1f)) {
-                    if (eventsForHour.isEmpty()) {
+                Column(Modifier.fillMaxSize()) {
+                    repeat(24) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(rowHeight)
-                                .clip(RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                        )
-                    } else {
-                        eventsForHour.forEach { event ->
-                            val eventColor = eventColor(event, defaultEventColor)
-                            val textColor = contrastingTextColor(eventColor)
-                            Column(
+                        ) {
+                            Divider(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(eventColor)
-                                    .clickable { onEditColor(event) }
-                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                    event.title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = textColor
-                                )
-                                val detail = if (event.allDay) {
-                                    "All day"
-                                } else {
-                                    formatEventTimeRangeShort(event, zone)
-                                }
-                                Text(
-                                    detail,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = textColor.copy(alpha = 0.85f)
-                                )
-                            }
+                                    .align(Alignment.BottomStart)
+                                    .fillMaxWidth(),
+                                thickness = 0.5.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                }
+
+                events.sortedBy { it.startEpochMillis }.forEach { event ->
+                    val span = eventSpanWithinDay(event, date, zone) ?: return@forEach
+                    val (startMinutes, endMinutes) = span
+                    val availableMinutes = 24 * 60 - startMinutes
+                    val minimumMinutes = if (event.allDay) availableMinutes else min(30, availableMinutes)
+                    val minutesLength = max(endMinutes - startMinutes, minimumMinutes)
+                    val topPx = rowHeightPx * (startMinutes / 60f)
+                    val blockHeightPx = rowHeightPx * (minutesLength / 60f)
+                    val blockHeightDp = with(density) { blockHeightPx.toDp() }
+
+                    val eventColor = eventColor(event, defaultEventColor)
+                    val textColor = contrastingTextColor(eventColor)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset { IntOffset(0, topPx.roundToInt()) }
+                            .padding(horizontal = 6.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(blockHeightDp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(eventColor)
+                                .clickable { onEditColor(event) }
+                                .padding(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                event.title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textColor,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                formatEventTimeRangeShort(event, zone),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = textColor.copy(alpha = 0.9f)
+                            )
                         }
                     }
                 }
@@ -822,22 +869,27 @@ private fun formatEventTimeRangeShort(event: Event, zone: ZoneId): String {
     return "$startText – $endText"
 }
 
-private fun eventCoversHour(event: Event, date: LocalDate, hour: Int, zone: ZoneId): Boolean {
-    if (event.allDay) return true
-    if (hour !in 0..23) return false
+private fun eventSpanWithinDay(event: Event, date: LocalDate, zone: ZoneId): Pair<Int, Int>? {
+    if (event.allDay) return 0 to 24 * 60
 
-    val start = Instant.ofEpochMilli(event.startEpochMillis).atZone(zone)
-    val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
+    val startInstant = Instant.ofEpochMilli(event.startEpochMillis)
+    val endInstant = Instant.ofEpochMilli(event.endEpochMillis)
+    val dayStart = date.atStartOfDay(zone).toInstant()
+    val dayEnd = date.plusDays(1).atStartOfDay(zone).toInstant()
 
-    if (start.toLocalDate() != date) return false
-
-    val startHour = start.hour
-    val inclusiveEndHour = when {
-        end.toLocalDate().isAfter(start.toLocalDate()) -> 23
-        else -> maxOf(startHour, end.hour)
+    if (!startInstant.isBefore(dayEnd) || !endInstant.isAfter(dayStart)) {
+        return null
     }
 
-    return hour in startHour..inclusiveEndHour.coerceAtMost(23)
+    val clampedStart = if (startInstant.isBefore(dayStart)) dayStart else startInstant
+    val clampedEnd = if (endInstant.isAfter(dayEnd)) dayEnd else endInstant
+
+    val startMinutes = ChronoUnit.MINUTES.between(dayStart, clampedStart).toInt().coerceIn(0, 24 * 60)
+    val endMinutes = ChronoUnit.MINUTES.between(dayStart, clampedEnd).toInt().coerceIn(0, 24 * 60)
+
+    if (endMinutes <= startMinutes) return null
+
+    return startMinutes to endMinutes
 }
 
 private fun eventColor(event: Event, defaultColor: Color): Color {

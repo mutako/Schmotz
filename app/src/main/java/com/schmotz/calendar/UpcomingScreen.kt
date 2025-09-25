@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +37,7 @@ fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
         val d = FirestoreRepository.millisToLocalDate(it.startEpochMillis)
         !d.isBefore(today) && YearMonth.from(d) == currentMonth
     }.sortedBy { it.startEpochMillis }
+        .take(3)
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
         Text("Upcoming", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
