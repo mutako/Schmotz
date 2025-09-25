@@ -16,8 +16,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,8 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -47,15 +50,19 @@ import java.util.Locale
 
 @Composable
 fun CalendarScreen(
-    repo: Repo,
+    repo: FirestoreRepository,
     profile: UserProfile
 ) {
     var currentYearMonth by remember { mutableStateOf(YearMonth.now()) }
     val today = remember { LocalDate.now() }
     var selectedDate by remember { mutableStateOf(today) }
 
-    // Local cache so the list updates instantly; we also persist via repo.
-    val eventsByDate = remember { mutableStateMapOf<LocalDate, MutableList<Event>>() }
+    val events by repo.observeAllEvents(profile.householdCode).collectAsState(initial = emptyList())
+    val eventsByDate = remember(events) {
+        events
+            .groupBy { FirestoreRepository.millisToLocalDate(it.startEpochMillis) }
+            .mapValues { (_, dayEvents) -> dayEvents.sortedBy { it.startEpochMillis } }
+    }
 
     var showAddDialog by remember { mutableStateOf(false) }
     var newTitle by remember { mutableStateOf("") }
@@ -143,10 +150,6 @@ fun CalendarScreen(
                             startEpochMillis = start,
                             endEpochMillis = end
                         )
-
-                        // Update local cache immediately
-                        val bucket = eventsByDate.getOrPut(selectedDate) { mutableListOf() }
-                        bucket.add(event)
 
                         // Persist
                         scope.launch {
@@ -271,7 +274,7 @@ private fun EventCard(event: Event) {
             Text(event.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
             Text(
-                "${event.startEpochMillis} – ${event.endEpochMillis}",
+                formatEventTimeRange(event),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -280,5 +283,24 @@ private fun EventCard(event: Event) {
                 Text(event.notes!!, style = MaterialTheme.typography.bodySmall)
             }
         }
+    }
+}
+
+private fun formatEventTimeRange(event: Event): String {
+    val zone = ZoneId.systemDefault()
+    val start = Instant.ofEpochMilli(event.startEpochMillis).atZone(zone)
+    val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
+    val dateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault())
+    val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault())
+
+    return if (start.toLocalDate() == end.toLocalDate()) {
+        val date = start.toLocalDate().format(dateFormatter)
+        val startTime = start.toLocalTime().format(timeFormatter)
+        val endTime = end.toLocalTime().format(timeFormatter)
+        "$date  $startTime – $endTime"
+    } else {
+        val startText = "${start.toLocalDate().format(dateFormatter)} ${start.toLocalTime().format(timeFormatter)}"
+        val endText = "${end.toLocalDate().format(dateFormatter)} ${end.toLocalTime().format(timeFormatter)}"
+        "$startText → $endText"
     }
 }

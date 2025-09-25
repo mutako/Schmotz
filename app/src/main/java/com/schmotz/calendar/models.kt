@@ -23,6 +23,7 @@ data class SharedLink(
     val url: String = "",
     val description: String? = null,
     val imageUrl: String? = null,
+    val category: String = "",
     val sharedByUid: String = "",
     val sharedByName: String = "",
     val sharedAt: Long = System.currentTimeMillis()
