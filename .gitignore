@@ -1,0 +1,28 @@
+    # Folders
+    .gradle/
+    build/
+    app/build/
+    captures/
+
+    # Files
+    *.apk
+    *.ap_
+    *.aab
+    *.aar
+    *.dex
+    *.iml
+    local.properties
+    .idea/workspace.xml
+    .idea/gradle.xml
+    .idea/misc.xml
+    .idea/deploymentTargetSelector.xml
+    .idea/libraries/
+    .idea/navEditor.xml
+    .DS_Store
+    *.keystore
+    *~
+    *.swp
+
+    # Specific large files you want to ignore
+    OpenJDK17U-jdk_x64_windows_hotspot_17.0.16_8.msi
+    SchmotzCalender.zip

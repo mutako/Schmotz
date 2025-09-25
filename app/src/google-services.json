@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967847021037",
+    "project_id": "schmotz-calender",
+    "storage_bucket": "schmotz-calender.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967847021037:android:81a64b2067d517ee967fe4",
+        "android_client_info": {
+          "package_name": "com.schmotz.calendar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKc3AvALlwgA9prdktHSO4_7IWeshtk88"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

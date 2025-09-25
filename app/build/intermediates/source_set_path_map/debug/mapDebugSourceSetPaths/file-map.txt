@@ -1,0 +1,76 @@
+com.schmotz.calendar.app-fragment-1.5.4-0 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\01be1e7ce43546c581088c5db2499ea3\transformed\fragment-1.5.4\res
+com.schmotz.calendar.app-jetified-ui-release-1 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\03b097a77b7ea2d83b8b22b8ecece345\transformed\jetified-ui-release\res
+com.schmotz.calendar.app-jetified-activity-compose-1.9.2-2 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\05b3e893db2b93cc7e369d5fbf59acb1\transformed\jetified-activity-compose-1.9.2\res
+com.schmotz.calendar.app-jetified-appcompat-resources-1.7.0-3 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\0702aff6bc63536eff6b29efd16f9b70\transformed\jetified-appcompat-resources-1.7.0\res
+com.schmotz.calendar.app-constraintlayout-2.0.1-4 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\11b97bb4e0bf84dcfbe4e13594386eae\transformed\constraintlayout-2.0.1\res
+com.schmotz.calendar.app-jetified-ui-graphics-release-5 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1488bc4fb9d309f22b72d875a3a40a93\transformed\jetified-ui-graphics-release\res
+com.schmotz.calendar.app-jetified-core-ktx-1.13.1-6 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1542c6b9f87aaa929474d47b31b483cc\transformed\jetified-core-ktx-1.13.1\res
+com.schmotz.calendar.app-jetified-annotation-experimental-1.4.1-7 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\173ff4876393eb4ca922b250b33646e4\transformed\jetified-annotation-experimental-1.4.1\res
+com.schmotz.calendar.app-cardview-1.0.0-8 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\174dc4831dea3227c5284432890fdab1\transformed\cardview-1.0.0\res
+com.schmotz.calendar.app-core-1.13.1-9 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1854fa837562be26bf514a9b5a911fd7\transformed\core-1.13.1\res
+com.schmotz.calendar.app-jetified-material-icons-core-release-10 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\189d7f654cf04befb0c26084d3b9dc35\transformed\jetified-material-icons-core-release\res
+com.schmotz.calendar.app-jetified-lifecycle-process-2.8.6-11 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1a90e2fdcff8cb363b520d60f5bedda8\transformed\jetified-lifecycle-process-2.8.6\res
+com.schmotz.calendar.app-jetified-activity-ktx-1.9.2-12 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\1fc08c83687649f34ae464f6c5669206\transformed\jetified-activity-ktx-1.9.2\res
+com.schmotz.calendar.app-navigation-common-ktx-2.8.2-13 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\229fc048e48507e36a77ee42e619cf7e\transformed\navigation-common-ktx-2.8.2\res
+com.schmotz.calendar.app-jetified-credentials-1.2.0-rc01-14 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\245cf70bb974782d57dce91649b4e97f\transformed\jetified-credentials-1.2.0-rc01\res
+com.schmotz.calendar.app-jetified-foundation-release-15 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\292e062ec5557116aaf43f7778a8829b\transformed\jetified-foundation-release\res
+com.schmotz.calendar.app-jetified-ui-tooling-release-16 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\2adf28c6b2f77c07a48a01febfc3ad60\transformed\jetified-ui-tooling-release\res
+com.schmotz.calendar.app-jetified-ui-unit-release-17 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\3f8dbe4abc50613560fbd99d6e854905\transformed\jetified-ui-unit-release\res
+com.schmotz.calendar.app-jetified-firebase-common-21.0.0-18 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\4041384b4268783a24397b56f7c99e8b\transformed\jetified-firebase-common-21.0.0\res
+com.schmotz.calendar.app-jetified-emoji2-1.3.0-19 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\41b2307f0c3174292edb57b60eb09ba9\transformed\jetified-emoji2-1.3.0\res
+com.schmotz.calendar.app-jetified-lifecycle-viewmodel-compose-release-20 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\4857472d6b97a546841faec74543f1f5\transformed\jetified-lifecycle-viewmodel-compose-release\res
+com.schmotz.calendar.app-jetified-lifecycle-runtime-ktx-release-21 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\56a56c25d019f7982dc48cdd43bb5a57\transformed\jetified-lifecycle-runtime-ktx-release\res
+com.schmotz.calendar.app-drawerlayout-1.1.1-22 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\573654bd553e3a7c40d0e7c29e71d0b2\transformed\drawerlayout-1.1.1\res
+com.schmotz.calendar.app-coordinatorlayout-1.1.0-23 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\591ab08cce1e3fb9673b20797399c7d5\transformed\coordinatorlayout-1.1.0\res
+com.schmotz.calendar.app-jetified-emoji2-views-helper-1.3.0-24 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\5d1c337826370ed30972a30e43d7c126\transformed\jetified-emoji2-views-helper-1.3.0\res
+com.schmotz.calendar.app-jetified-material3-release-25 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\677d32b8e62ce153120d839ccd52b80c\transformed\jetified-material3-release\res
+com.schmotz.calendar.app-jetified-activity-1.9.2-26 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\68af63499539d420a9c2975c640ddbab\transformed\jetified-activity-1.9.2\res
+com.schmotz.calendar.app-jetified-lifecycle-viewmodel-release-27 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\6e0c11f102bfadbc6bf3281ac8d089e4\transformed\jetified-lifecycle-viewmodel-release\res
+com.schmotz.calendar.app-recyclerview-1.1.0-28 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\6f0e2867ee1103706bd77fd6e311f6c8\transformed\recyclerview-1.1.0\res
+com.schmotz.calendar.app-jetified-graphics-path-1.0.1-29 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\70be054bb30f436a9619f2c33ee0313f\transformed\jetified-graphics-path-1.0.1\res
+com.schmotz.calendar.app-jetified-ui-geometry-release-30 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\7212b56eb27d220ec5c298e64c9b1fad\transformed\jetified-ui-geometry-release\res
+com.schmotz.calendar.app-appcompat-1.7.0-31 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\72765ec574be4e15f278b9ab3b3761a7\transformed\appcompat-1.7.0\res
+com.schmotz.calendar.app-jetified-play-services-auth-20.7.0-32 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\7817a3937929878a9d8b108dbe6a0546\transformed\jetified-play-services-auth-20.7.0\res
+com.schmotz.calendar.app-jetified-lifecycle-viewmodel-ktx-2.8.6-33 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\784b6e803ef460e418a45d8f6e4e87ba\transformed\jetified-lifecycle-viewmodel-ktx-2.8.6\res
+com.schmotz.calendar.app-jetified-play-services-base-18.0.1-34 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\7adb120f4233465110c50840dd648ea5\transformed\jetified-play-services-base-18.0.1\res
+com.schmotz.calendar.app-jetified-runtime-release-35 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\868b8ad0e6ec4ae6122befe82ff6fe18\transformed\jetified-runtime-release\res
+com.schmotz.calendar.app-jetified-lifecycle-viewmodel-savedstate-2.8.6-36 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\88490127cf2dc6f019730d0089b059f1\transformed\jetified-lifecycle-viewmodel-savedstate-2.8.6\res
+com.schmotz.calendar.app-jetified-foundation-layout-release-37 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\8910ff81541763904b9ce38ea233456c\transformed\jetified-foundation-layout-release\res
+com.schmotz.calendar.app-jetified-animation-core-release-38 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\8a6d470848586ab9e11b361b7d4434fa\transformed\jetified-animation-core-release\res
+com.schmotz.calendar.app-navigation-common-2.8.2-39 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\9822f632db795cf8f813cb5ac594d060\transformed\navigation-common-2.8.2\res
+com.schmotz.calendar.app-jetified-play-services-basement-18.3.0-40 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\9b3faab26dca774f3f194f1f35866f67\transformed\jetified-play-services-basement-18.3.0\res
+com.schmotz.calendar.app-jetified-savedstate-ktx-1.2.1-41 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\9e79d96023c2cb5763ca34ff81155001\transformed\jetified-savedstate-ktx-1.2.1\res
+com.schmotz.calendar.app-material-1.12.0-42 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\a0e84c1d5f2acadb29f581242253ab6c\transformed\material-1.12.0\res
+com.schmotz.calendar.app-jetified-viewpager2-1.0.0-43 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\aa2d652d116c6004725f61e4da7ef2db\transformed\jetified-viewpager2-1.0.0\res
+com.schmotz.calendar.app-lifecycle-livedata-2.8.6-44 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\adbdde06a88426315f9fa527e6135644\transformed\lifecycle-livedata-2.8.6\res
+com.schmotz.calendar.app-jetified-customview-poolingcontainer-1.0.0-45 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\b3967b07ef59ecda6d9b9f645fedf8c8\transformed\jetified-customview-poolingcontainer-1.0.0\res
+com.schmotz.calendar.app-navigation-runtime-ktx-2.8.2-46 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\b4430c9a901ca906a194158fa1c33501\transformed\navigation-runtime-ktx-2.8.2\res
+com.schmotz.calendar.app-lifecycle-livedata-core-2.8.6-47 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\b4bbacdad599ea1dd312b8c3db1dc48c\transformed\lifecycle-livedata-core-2.8.6\res
+com.schmotz.calendar.app-jetified-ui-util-release-48 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\b539a58a0968d298086e1936a70fdebb\transformed\jetified-ui-util-release\res
+com.schmotz.calendar.app-jetified-lifecycle-runtime-release-49 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\bae4564bf73f49102ddb781aebc13cc2\transformed\jetified-lifecycle-runtime-release\res
+com.schmotz.calendar.app-jetified-lifecycle-runtime-compose-release-50 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\bf0acfaea2a1b576628965691ff1db09\transformed\jetified-lifecycle-runtime-compose-release\res
+com.schmotz.calendar.app-jetified-startup-runtime-1.1.1-51 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\c419eb7faff2505d4b1f64f150f8dd2d\transformed\jetified-startup-runtime-1.1.1\res
+com.schmotz.calendar.app-jetified-runtime-saveable-release-52 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\c552d368e7a1df7734a42e17d5d85fba\transformed\jetified-runtime-saveable-release\res
+com.schmotz.calendar.app-transition-1.5.0-53 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\c62a6ecf96fdf25be644feb499f97688\transformed\transition-1.5.0\res
+com.schmotz.calendar.app-jetified-navigation-compose-2.8.2-54 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\c9a40821134c64e786f6acb3ac173cfa\transformed\jetified-navigation-compose-2.8.2\res
+com.schmotz.calendar.app-jetified-credentials-play-services-auth-1.2.0-rc01-55 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\cb3a26f705034d04f13924ecd4d855e8\transformed\jetified-credentials-play-services-auth-1.2.0-rc01\res
+com.schmotz.calendar.app-core-runtime-2.2.0-56 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\cec9173ca7a2c35c8583fc780e3a5ca4\transformed\core-runtime-2.2.0\res
+com.schmotz.calendar.app-jetified-savedstate-1.2.1-57 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\d00f79ebda73ac1aa63520662bd5654a\transformed\jetified-savedstate-1.2.1\res
+com.schmotz.calendar.app-browser-1.4.0-58 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\d043350c27f5428eee6ac551779206db\transformed\browser-1.4.0\res
+com.schmotz.calendar.app-navigation-runtime-2.8.2-59 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\d5e7030c796ec2c3fe3ddffba4c71851\transformed\navigation-runtime-2.8.2\res
+com.schmotz.calendar.app-jetified-animation-release-60 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\d759229b45727773e5f5e88fb12e344f\transformed\jetified-animation-release\res
+com.schmotz.calendar.app-jetified-coil-base-2.6.0-61 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\dd0ef3584942e21778c00cf03ce93e75\transformed\jetified-coil-base-2.6.0\res
+com.schmotz.calendar.app-jetified-lifecycle-livedata-core-ktx-2.8.6-62 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\e6e37f59cea44ba082bc9e0fb99378d6\transformed\jetified-lifecycle-livedata-core-ktx-2.8.6\res
+com.schmotz.calendar.app-jetified-material-release-63 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\e915beb0fbe404afb759e9c7041dafcf\transformed\jetified-material-release\res
+com.schmotz.calendar.app-jetified-ui-text-release-64 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\ec4867b59ccd72b240390143ea42e7dc\transformed\jetified-ui-text-release\res
+com.schmotz.calendar.app-jetified-ui-tooling-data-release-65 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\ec84c472e847c299fabec5879e8e8bfe\transformed\jetified-ui-tooling-data-release\res
+com.schmotz.calendar.app-jetified-ui-tooling-preview-release-66 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\effb2d6b85b96dd5f17c97856b5dd95a\transformed\jetified-ui-tooling-preview-release\res
+com.schmotz.calendar.app-jetified-material-ripple-release-67 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\f68698011d4dc19c6e2b14e8e15e8d1e\transformed\jetified-material-ripple-release\res
+com.schmotz.calendar.app-jetified-profileinstaller-1.3.1-68 C:\Users\carha\.gradle\caches\9.0-milestone-1\transforms\ff712c372e45a3d51288fad8e175cb1c\transformed\jetified-profileinstaller-1.3.1\res
+com.schmotz.calendar.app-res-69 H:\SOFTWARE\Schmotz Calender\app\build\generated\res\processDebugGoogleServices
+com.schmotz.calendar.app-resValues-70 H:\SOFTWARE\Schmotz Calender\app\build\generated\res\resValues\debug
+com.schmotz.calendar.app-packageDebugResources-71 H:\SOFTWARE\Schmotz Calender\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.schmotz.calendar.app-packageDebugResources-72 H:\SOFTWARE\Schmotz Calender\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.schmotz.calendar.app-debug-73 H:\SOFTWARE\Schmotz Calender\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.schmotz.calendar.app-debug-74 H:\SOFTWARE\Schmotz Calender\app\src\debug\res
+com.schmotz.calendar.app-main-75 H:\SOFTWARE\Schmotz Calender\app\src\main\res
