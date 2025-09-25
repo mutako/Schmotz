@@ -37,36 +37,47 @@ fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
         val d = FirestoreRepository.millisToLocalDate(it.startEpochMillis)
         !d.isBefore(today) && YearMonth.from(d) == currentMonth
     }.sortedBy { it.startEpochMillis }
-        .take(3)
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
         Text("Upcoming", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        LazyColumn(
-            contentPadding = PaddingValues(top = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(upcoming.size) { i ->
-                val ev = upcoming[i]
-                ElevatedCard {
-                    Column(Modifier.padding(12.dp)) {
-                        val start = Instant.ofEpochMilli(ev.startEpochMillis).atZone(zone)
-                        val end = Instant.ofEpochMilli(ev.endEpochMillis).atZone(zone)
-                        val datePart = start.toLocalDate().format(dateFormatter)
-                        val detail = if (ev.allDay) {
-                            "$datePart · All day"
-                        } else if (start.toLocalDate() == end.toLocalDate()) {
-                            val startTime = start.toLocalTime().format(timeFormatter)
-                            val endTime = end.toLocalTime().format(timeFormatter)
-                            "$datePart · $startTime – $endTime"
-                        } else {
-                            val endPart = end.toLocalDate().format(dateFormatter)
-                            val startTime = start.toLocalTime().format(timeFormatter)
-                            val endTime = end.toLocalTime().format(timeFormatter)
-                            "$datePart $startTime → $endPart $endTime"
+        if (upcoming.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .weight(1f, fill = true)
+                    .padding(top = 24.dp),
+                verticalArrangement = Arrangement.Top
+            ) {
+                Text("No more events scheduled for this month yet.", style = MaterialTheme.typography.bodyMedium)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f, fill = true),
+                contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(upcoming.size) { i ->
+                    val ev = upcoming[i]
+                    ElevatedCard {
+                        Column(Modifier.padding(12.dp)) {
+                            val start = Instant.ofEpochMilli(ev.startEpochMillis).atZone(zone)
+                            val end = Instant.ofEpochMilli(ev.endEpochMillis).atZone(zone)
+                            val datePart = start.toLocalDate().format(dateFormatter)
+                            val detail = if (ev.allDay) {
+                                "$datePart · All day"
+                            } else if (start.toLocalDate() == end.toLocalDate()) {
+                                val startTime = start.toLocalTime().format(timeFormatter)
+                                val endTime = end.toLocalTime().format(timeFormatter)
+                                "$datePart · $startTime – $endTime"
+                            } else {
+                                val endPart = end.toLocalDate().format(dateFormatter)
+                                val startTime = start.toLocalTime().format(timeFormatter)
+                                val endTime = end.toLocalTime().format(timeFormatter)
+                                "$datePart $startTime → $endPart $endTime"
+                            }
+                            Text(ev.title, style = MaterialTheme.typography.titleMedium)
+                            Text(detail, style = MaterialTheme.typography.bodySmall)
+                            ev.notes?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                         }
-                        Text(ev.title, style = MaterialTheme.typography.titleMedium)
-                        Text(detail, style = MaterialTheme.typography.bodySmall)
-                        ev.notes?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                     }
                 }
             }

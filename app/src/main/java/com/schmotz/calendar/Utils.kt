@@ -1,5 +1,8 @@
 package com.schmotz.calendar
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.jsoup.Jsoup
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -14,8 +17,34 @@ fun LocalDate.atTimeMillis(time: LocalTime): Long =
     this.atTime(time).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
 suspend fun fetchMetadata(url: String): Triple<String, String?, String?> {
-    val title = if (url.length > 60) url.take(57) + "..." else url
-    val description: String? = null
-    val imageUrl: String? = null
-    return Triple(title, description, imageUrl)
+    val fallbackTitle = if (url.length > 60) url.take(57) + "..." else url
+
+    return withContext(Dispatchers.IO) {
+        runCatching {
+            val document = Jsoup.connect(url)
+                .userAgent("Mozilla/5.0 (compatible; SchmotzCalendar/1.0)")
+                .timeout(10_000)
+                .get()
+
+            val title = document.selectFirst("meta[property=og:title]")?.attr("content")
+                ?.ifBlank { null }
+                ?: document.title().takeIf { it.isNotBlank() }
+                ?: fallbackTitle
+
+            val description = listOf(
+                document.selectFirst("meta[property=og:description]")?.attr("content"),
+                document.selectFirst("meta[name=description]")?.attr("content"),
+                document.selectFirst("meta[name=twitter:description]")?.attr("content")
+            ).firstOrNull { !it.isNullOrBlank() }
+
+            val image = listOf(
+                document.selectFirst("meta[property=og:image]")?.attr("content"),
+                document.selectFirst("meta[name=twitter:image]")?.attr("content")
+            ).firstOrNull { !it.isNullOrBlank() }
+
+            Triple(title, description?.trim(), image?.trim())
+        }.getOrElse {
+            Triple(fallbackTitle, null, null)
+        }
+    }
 }
