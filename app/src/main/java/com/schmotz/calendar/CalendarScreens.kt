@@ -17,11 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -75,21 +81,25 @@ fun CalendarScreen(
     var selectedDate by remember { mutableStateOf(today) }
 
     val events by repo.observeAllEvents(profile.householdCode).collectAsState(initial = emptyList())
-    val eventsByDate = remember(events) {
-        events
-            .groupBy { FirestoreRepository.millisToLocalDate(it.startEpochMillis) }
-            .mapValues { (_, dayEvents) -> dayEvents.sortedBy { it.startEpochMillis } }
-    }
+    val eventsByDate = events
+        .groupBy { FirestoreRepository.millisToLocalDate(it.startEpochMillis) }
+        .mapValues { (_, dayEvents) -> dayEvents.sortedBy { it.startEpochMillis } }
+    val monthEventsByDate = eventsByDate.entries
+        .filter { (date, _) ->
+            date.year == currentYearMonth.year && date.month == currentYearMonth.month
+        }
+        .sortedBy { it.key }
 
     var overviewDate by remember { mutableStateOf<LocalDate?>(null) }
     var editingDate by remember { mutableStateOf<LocalDate?>(null) }
     var newTitle by remember { mutableStateOf("") }
-    var isAllDay by remember { mutableStateOf(true) }
+    var isAllDay by remember { mutableStateOf(false) }
     var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
     var endTime by remember { mutableStateOf(LocalTime.of(10, 0)) }
     var repeatFrequency by remember { mutableStateOf(RepeatFrequency.NONE) }
     var validationError by remember { mutableStateOf<String?>(null) }
     var showRepeatChooser by remember { mutableStateOf(false) }
+    var showMonthOverview by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val timeFormatter = remember { DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()) }
@@ -98,7 +108,7 @@ fun CalendarScreen(
     fun beginCreateEvent(forDate: LocalDate) {
         editingDate = forDate
         newTitle = ""
-        isAllDay = true
+        isAllDay = false
         startTime = LocalTime.of(9, 0)
         endTime = LocalTime.of(10, 0)
         repeatFrequency = RepeatFrequency.NONE
@@ -122,12 +132,15 @@ fun CalendarScreen(
             Text(
                 text = "${currentYearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentYearMonth.year}",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable { showMonthOverview = true }
             )
             Spacer(Modifier.width(12.dp))
             Button(onClick = { currentYearMonth = currentYearMonth.plusMonths(1) }) { Text(">") }
             Spacer(Modifier.weight(1f))
-            Button(onClick = { beginCreateEvent(selectedDate) }) { Text("Add event") }
+            IconButton(onClick = { beginCreateEvent(selectedDate) }) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add event")
+            }
         }
 
         Spacer(Modifier.height(8.dp))
@@ -352,6 +365,41 @@ fun CalendarScreen(
                     repeatFrequency = RepeatFrequency.NONE
                     showRepeatChooser = false
                 }) { Text("No repeat") }
+            }
+        )
+    }
+
+    if (showMonthOverview) {
+        val monthTitle = "${currentYearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentYearMonth.year}"
+        AlertDialog(
+            onDismissRequest = { showMonthOverview = false },
+            title = { Text(monthTitle) },
+            text = {
+                if (monthEventsByDate.isEmpty()) {
+                    Text("No events this month.")
+                } else {
+                    Column(
+                        Modifier
+                            .heightIn(max = 400.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        monthEventsByDate.forEach { (date, eventsForDay) ->
+                            Text(
+                                date.format(dateFormatter),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            eventsForDay.forEach { event ->
+                                EventCard(event)
+                            }
+                            Spacer(Modifier.height(12.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showMonthOverview = false }) { Text("Close") }
             }
         )
     }
