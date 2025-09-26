@@ -208,6 +208,8 @@ fun CalendarScreen(
         ).show()
     }
 
+    val firstDayOfWeek = DayOfWeek.MONDAY
+
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(onClick = { currentYearMonth = currentYearMonth.minusMonths(1) }) { Text("<") }
@@ -230,7 +232,6 @@ fun CalendarScreen(
         Divider()
         Spacer(Modifier.height(8.dp))
 
-        val firstDayOfWeek = DayOfWeek.MONDAY
         WeekdayHeader(firstDayOfWeek)
 
         Spacer(Modifier.height(4.dp))
@@ -794,7 +795,7 @@ private fun DaySchedule(
     val density = LocalDensity.current
 
     LaunchedEffect(date, targetHour) {
-        val targetPx = with(density) { (rowHeight * targetHour).roundToPx() }
+        val targetPx = with(density) { (rowHeight * targetHour.toFloat()).roundToPx() }
         scrollState.scrollTo(targetPx)
     }
 
@@ -843,7 +844,7 @@ private fun DaySchedule(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(rowHeight * 24)
+                    .height(rowHeight * 24f)
             ) {
                 Column {
                     repeat(24) {
@@ -859,7 +860,7 @@ private fun DaySchedule(
                     Divider(
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .offset(y = rowHeight * hour),
+                            .offset(y = rowHeight * hour.toFloat()),
                         thickness = 0.5.dp,
                         color = outline
                     )
@@ -868,10 +869,13 @@ private fun DaySchedule(
                     val startMinutes = span.first
                     val durationMinutes = (span.second - span.first).coerceAtLeast(1)
                     val (topOffset, height) = if (event.allDay) {
-                        0.dp to rowHeight * 3
+                        0.dp to rowHeight * 3f
                     } else {
                         val offset = rowHeight * (startMinutes / 60f)
-                        val blockHeight = rowHeight * (durationMinutes / 60f).coerceAtLeast(rowHeight / 2)
+                        val blockHeight = (rowHeight * (durationMinutes / 60f)).let { calculated ->
+                            val minHeight = rowHeight * 0.5f
+                            if (calculated < minHeight) minHeight else calculated
+                        }
                         offset to blockHeight
                     }
                     val eventColor = eventColor(event, defaultEventColor)
