@@ -46,5 +46,14 @@ data class SharedLink(
     val category: String = "",
     val sharedByUid: String = "",
     val sharedByName: String = "",
-    val sharedAt: Long = System.currentTimeMillis()
+    val sharedAt: Long = System.currentTimeMillis(),
+    val comments: List<LinkComment> = emptyList()
+) : Serializable
+
+data class LinkComment(
+    val id: String = "",
+    val authorUid: String = "",
+    val authorName: String = "",
+    val message: String = "",
+    val createdAt: Long = System.currentTimeMillis()
 ) : Serializable

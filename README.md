@@ -32,3 +32,4 @@ Add security rules to restrict access; simplest approach is to check that a user
 - You can change the shared access code anytime in **Settings**.
 - The app label is **Schmotz**.
 - The Gradle wrapper expects `gradle/wrapper/gradle-9.0-milestone-1-bin.zip` to exist locally. Download it once from <https://services.gradle.org/distributions/> and copy it next to `gradle-wrapper.jar` before running the wrapper offline.
+- The top bar loads the Instagram profile photo as the in-app logo. To make it the launcher icon too, download that image and replace the adaptive icon assets under `app/src/main/res/mipmap-*` in Android Studio's Image Asset tool.

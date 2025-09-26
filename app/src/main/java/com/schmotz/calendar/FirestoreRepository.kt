@@ -2,6 +2,7 @@ package com.schmotz.calendar
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.UUID
 
 class FirestoreRepository(
     private val auth: FirebaseAuth,
@@ -82,6 +84,37 @@ class FirestoreRepository(
                 }
             awaitClose { registration.remove() }
         }
+    }
+
+    suspend fun updateLinkCategory(profile: UserProfile, linkId: String, category: String) {
+        if (profile.householdCode.isBlank() || linkId.isBlank()) return
+        db.collection(HOUSEHOLDS)
+            .document(profile.householdCode)
+            .collection(LINKS)
+            .document(linkId)
+            .update("category", category)
+            .await()
+    }
+
+    suspend fun addLinkComment(profile: UserProfile, linkId: String, comment: LinkComment) {
+        if (profile.householdCode.isBlank() || linkId.isBlank()) return
+        val sanitizedMessage = comment.message.trim()
+        if (sanitizedMessage.isBlank()) return
+
+        val document = db.collection(HOUSEHOLDS)
+            .document(profile.householdCode)
+            .collection(LINKS)
+            .document(linkId)
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(document)
+            val existing = snapshot.toObject<SharedLink>()?.comments.orEmpty()
+            val newComment = comment.copy(
+                id = comment.id.ifBlank { UUID.randomUUID().toString() },
+                message = sanitizedMessage
+            )
+            transaction.update(document, "comments", existing + newComment)
+        }.await()
     }
 
     suspend fun upsertEvent(profile: UserProfile, event: Event) {

@@ -97,7 +97,8 @@ fun SearchScreen(
                         link.title,
                         link.url,
                         link.description.orEmpty(),
-                        link.category
+                        link.category,
+                        link.comments.joinToString(" ") { it.message }
                     ).joinToString(" ")
                         .lowercase(locale)
                         .contains(normalized)

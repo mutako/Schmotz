@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -210,7 +212,28 @@ fun CalendarScreen(
 
     val firstDayOfWeek = DayOfWeek.MONDAY
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    val swipeThresholdPx = with(LocalDensity.current) { 64.dp.toPx() }
+    var dragOffset by remember { mutableStateOf(0f) }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .pointerInput(currentYearMonth) {
+                detectHorizontalDragGestures(
+                    onDragStart = { dragOffset = 0f },
+                    onHorizontalDrag = { _, amount -> dragOffset += amount },
+                    onDragCancel = { dragOffset = 0f },
+                    onDragEnd = {
+                        when {
+                            dragOffset > swipeThresholdPx -> currentYearMonth = currentYearMonth.minusMonths(1)
+                            dragOffset < -swipeThresholdPx -> currentYearMonth = currentYearMonth.plusMonths(1)
+                        }
+                        dragOffset = 0f
+                    }
+                )
+            }
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(onClick = { currentYearMonth = currentYearMonth.minusMonths(1) }) { Text("<") }
             Spacer(Modifier.width(12.dp))
