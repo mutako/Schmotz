@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -23,7 +24,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -238,18 +238,23 @@ fun CalendarScreen(
                 )
             }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = { currentYearMonth = currentYearMonth.minusMonths(1) }) { Text("<") }
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = "${currentYearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentYearMonth.year}",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { showMonthOverview = true }
-            )
-            Spacer(Modifier.width(12.dp))
-            Button(onClick = { currentYearMonth = currentYearMonth.plusMonths(1) }) { Text(">") }
-            Spacer(Modifier.weight(1f))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = { currentYearMonth = currentYearMonth.minusMonths(1) }) { Text("<") }
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = "${currentYearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentYearMonth.year}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable { showMonthOverview = true }
+                )
+                Spacer(Modifier.width(12.dp))
+                Button(onClick = { currentYearMonth = currentYearMonth.plusMonths(1) }) { Text(">") }
+            }
             IconButton(onClick = { showQuickAddWeekPicker = true }) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add event")
             }
@@ -361,9 +366,12 @@ fun CalendarScreen(
                         singleLine = true
                     )
                     Spacer(Modifier.height(12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text("All-day", style = MaterialTheme.typography.bodyLarge)
-                        Spacer(Modifier.weight(1f))
                         Switch(
                             checked = isAllDay,
                             onCheckedChange = { isAllDay = it },
@@ -372,16 +380,15 @@ fun CalendarScreen(
                     }
                     if (!isAllDay) {
                         Spacer(Modifier.height(12.dp))
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Column {
                                 Text("Start", style = MaterialTheme.typography.labelMedium)
                                 Spacer(Modifier.height(4.dp))
                                 OutlinedButton(onClick = { showTimePicker(startTime) { startTime = it } }) {
                                     Text(startTime.format(timeFormatter))
                                 }
                             }
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
+                            Column {
                                 Text("End", style = MaterialTheme.typography.labelMedium)
                                 Spacer(Modifier.height(4.dp))
                                 OutlinedButton(onClick = { showTimePicker(endTime) { endTime = it } }) {
@@ -624,12 +631,13 @@ private fun WeekdayHeader(firstDayOfWeek: DayOfWeek) {
     val days = DayOfWeek.entries
         .dropWhile { it != firstDayOfWeek } + DayOfWeek.entries.takeWhile { it != firstDayOfWeek }
 
-    Row(Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
         days.forEach { dow ->
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
+                modifier = Modifier.padding(vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -698,8 +706,10 @@ private fun MonthGrid(
                         .padding(6.dp)
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        Row(Modifier.fillMaxWidth()) {
-                            Spacer(Modifier.weight(1f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
                             Text(
                                 text = cell.dayOfMonth.toString(),
                                 style = MaterialTheme.typography.bodyLarge,
@@ -846,12 +856,13 @@ private fun DaySchedule(
         return
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 420.dp)
             .verticalScroll(scrollState)
     ) {
+        val availableTimelineWidth = (maxWidth - 76.dp).coerceAtLeast(0.dp)
         Row(Modifier.fillMaxWidth()) {
             Column(Modifier.width(64.dp)) {
                 repeat(24) { hour ->
@@ -873,7 +884,7 @@ private fun DaySchedule(
             Spacer(Modifier.width(12.dp))
             Box(
                 modifier = Modifier
-                    .weight(1f)
+                    .width(availableTimelineWidth)
                     .height(rowHeight * 24f)
             ) {
                 Column {
@@ -942,7 +953,7 @@ private fun DaySchedule(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = textColor.copy(alpha = 0.9f)
                             )
-                            Spacer(modifier = Modifier.weight(1f, fill = true))
+                            Spacer(Modifier.height(0.dp))
                         }
                     }
                 }

@@ -1,23 +1,18 @@
-@file:OptIn(ExperimentalLayoutApi::class)
-
 package com.schmotz.calendar
 
 import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -69,48 +64,44 @@ fun UpcomingScreen(
         .filter { event -> event.endEpochMillis >= nowMillis }
         .sortedBy { it.startEpochMillis }
 
-    Column(Modifier.fillMaxSize().padding(12.dp)) {
-        Text("Upcoming", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Text("Upcoming", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        }
         if (upcoming.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .weight(1f, fill = true)
-                    .padding(top = 24.dp),
-                verticalArrangement = Arrangement.Top
-            ) {
+            item {
                 Text("No upcoming events yet.", style = MaterialTheme.typography.bodyMedium)
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f, fill = true),
-                contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(upcoming.size) { i ->
-                    val ev = upcoming[i]
-                    ElevatedCard(
-                        modifier = Modifier.clickable { selectedEvent = ev }
-                    ) {
-                        Column(Modifier.padding(12.dp)) {
-                            val start = Instant.ofEpochMilli(ev.startEpochMillis).atZone(zone)
-                            val end = Instant.ofEpochMilli(ev.endEpochMillis).atZone(zone)
-                            val datePart = start.toLocalDate().format(dateFormatter)
-                            val detail = if (ev.allDay) {
-                                "$datePart · All day"
-                            } else if (start.toLocalDate() == end.toLocalDate()) {
-                                val startTime = start.toLocalTime().format(timeFormatter)
-                                val endTime = end.toLocalTime().format(timeFormatter)
-                                "$datePart · $startTime – $endTime"
-                            } else {
-                                val endPart = end.toLocalDate().format(dateFormatter)
-                                val startTime = start.toLocalTime().format(timeFormatter)
-                                val endTime = end.toLocalTime().format(timeFormatter)
-                                "$datePart $startTime → $endPart $endTime"
-                            }
-                            Text(ev.title, style = MaterialTheme.typography.titleMedium)
-                            Text(detail, style = MaterialTheme.typography.bodySmall)
-                            ev.notes?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+            itemsIndexed(upcoming) { _, ev ->
+                ElevatedCard(
+                    modifier = Modifier.clickable { selectedEvent = ev }
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        val start = Instant.ofEpochMilli(ev.startEpochMillis).atZone(zone)
+                        val end = Instant.ofEpochMilli(ev.endEpochMillis).atZone(zone)
+                        val datePart = start.toLocalDate().format(dateFormatter)
+                        val detail = if (ev.allDay) {
+                            "$datePart · All day"
+                        } else if (start.toLocalDate() == end.toLocalDate()) {
+                            val startTime = start.toLocalTime().format(timeFormatter)
+                            val endTime = end.toLocalTime().format(timeFormatter)
+                            "$datePart · $startTime – $endTime"
+                        } else {
+                            val endPart = end.toLocalDate().format(dateFormatter)
+                            val startTime = start.toLocalTime().format(timeFormatter)
+                            val endTime = end.toLocalTime().format(timeFormatter)
+                            "$datePart $startTime → $endPart $endTime"
                         }
+                        Text(ev.title, style = MaterialTheme.typography.titleMedium)
+                        Text(detail, style = MaterialTheme.typography.bodySmall)
+                        ev.notes?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                     }
                 }
             }
@@ -201,9 +192,12 @@ private fun UpcomingEventDialog(
                     singleLine = true
                 )
                 Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text("All-day", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(Modifier.weight(1f))
                     Switch(
                         checked = isAllDay,
                         onCheckedChange = { isAllDay = it },
@@ -212,16 +206,15 @@ private fun UpcomingEventDialog(
                 }
                 if (!isAllDay) {
                     Spacer(Modifier.height(12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column {
                             Text("Start", style = MaterialTheme.typography.labelMedium)
                             Spacer(Modifier.height(4.dp))
                             OutlinedButton(onClick = { showTimePicker(startTime) { startTime = it } }) {
                                 Text(startTime.format(timeFormatter))
                             }
                         }
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
+                        Column {
                             Text("End", style = MaterialTheme.typography.labelMedium)
                             Spacer(Modifier.height(4.dp))
                             OutlinedButton(onClick = { showTimePicker(endTime) { endTime = it } }) {
