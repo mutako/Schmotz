@@ -56,7 +56,7 @@ class ShareReceiverActivity : Activity() {
                 sharedAt = System.currentTimeMillis()
             )
             linksCollection(profile.householdCode).add(link).await()
-            Toast.makeText(this@ShareReceiverActivity, "Saved to Schmotz Calender", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@ShareReceiverActivity, "Saved to Schmotz", Toast.LENGTH_SHORT).show()
             finish()
         }
     }

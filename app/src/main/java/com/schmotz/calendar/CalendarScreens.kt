@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -49,6 +50,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,7 +93,9 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun CalendarScreen(
     repo: FirestoreRepository,
-    profile: UserProfile
+    profile: UserProfile,
+    pendingExternalEditEvent: Event? = null,
+    onExternalEditConsumed: () -> Unit = {}
 ) {
     var currentYearMonth by remember { mutableStateOf(YearMonth.now()) }
     val today = remember { LocalDate.now() }
@@ -144,11 +148,24 @@ fun CalendarScreen(
         editingEvent = null
         newTitle = ""
         isAllDay = false
-        startTime = LocalTime.of(9, 0)
-        endTime = LocalTime.of(10, 0)
+        val nowTime = LocalTime.now()
+        val adjustedStart = if (nowTime.hour == 23 && nowTime.minute > 0) {
+            LocalTime.of(23, 0)
+        } else {
+            nowTime
+        }
+        val tentativeEnd = adjustedStart.plusHours(1)
+        startTime = adjustedStart
+        endTime = if (tentativeEnd.isBefore(adjustedStart)) {
+            LocalTime.of(23, 59)
+        } else {
+            tentativeEnd
+        }
         repeatFrequency = RepeatFrequency.NONE
         validationError = null
         selectedColorInt = defaultEventColor.toArgb()
+        currentYearMonth = YearMonth.from(forDate)
+        selectedDate = forDate
     }
 
     fun beginEditEvent(event: Event) {
@@ -157,7 +174,10 @@ fun CalendarScreen(
         val end = Instant.ofEpochMilli(event.endEpochMillis).atZone(zone)
 
         editingEvent = event
-        editingDate = start.toLocalDate()
+        val date = start.toLocalDate()
+        editingDate = date
+        selectedDate = date
+        currentYearMonth = YearMonth.from(date)
         newTitle = event.title
         isAllDay = event.allDay
         if (event.allDay) {
@@ -170,6 +190,13 @@ fun CalendarScreen(
         repeatFrequency = event.repeatFrequency
         validationError = null
         selectedColorInt = eventColorInt(event, defaultEventColor)
+    }
+
+    LaunchedEffect(pendingExternalEditEvent?.id) {
+        pendingExternalEditEvent?.let { event ->
+            beginEditEvent(event)
+            onExternalEditConsumed()
+        }
     }
 
     fun showTimePicker(initial: LocalTime, onTimeSelected: (LocalTime) -> Unit) {
@@ -747,10 +774,23 @@ private fun DaySchedule(
     val outline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
     val emptyBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
 
+    val targetHour = remember(date, events) {
+        val firstEventHour = eventSpans.minOfOrNull { (_, span) -> span.first / 60 }
+        val fallback = LocalTime.now(zone).hour
+        (firstEventHour ?: fallback).coerceIn(0, 23)
+    }
+    val headerOffset = if (eventSpans.isEmpty()) 1 else 0
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(date, targetHour, headerOffset) {
+        listState.scrollToItem(targetHour + headerOffset)
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 420.dp),
+        state = listState,
         contentPadding = PaddingValues(vertical = 4.dp)
     ) {
         if (eventSpans.isEmpty()) {

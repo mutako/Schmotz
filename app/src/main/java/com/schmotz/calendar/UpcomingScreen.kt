@@ -1,5 +1,6 @@
 package com.schmotz.calendar
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +24,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
+fun UpcomingScreen(
+    repo: FirestoreRepository,
+    profile: UserProfile,
+    onEventClick: (Event) -> Unit
+) {
     val household = profile.householdCode.ifBlank { "FAMILY" }
     val all by repo.observeAllEvents(household).collectAsState(initial = emptyList())
     val zone = remember { ZoneId.systemDefault() }
@@ -54,7 +59,9 @@ fun UpcomingScreen(repo: FirestoreRepository, profile: UserProfile) {
             ) {
                 items(upcoming.size) { i ->
                     val ev = upcoming[i]
-                    ElevatedCard {
+                    ElevatedCard(
+                        modifier = Modifier.clickable { onEventClick(ev) }
+                    ) {
                         Column(Modifier.padding(12.dp)) {
                             val start = Instant.ofEpochMilli(ev.startEpochMillis).atZone(zone)
                             val end = Instant.ofEpochMilli(ev.endEpochMillis).atZone(zone)

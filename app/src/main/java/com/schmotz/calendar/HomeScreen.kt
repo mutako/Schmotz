@@ -13,6 +13,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -26,11 +27,12 @@ fun HomeScreen(
 ) {
     var tab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf("Calendar", "Upcoming", "Links", "Search")
+    var pendingEditEvent by remember { mutableStateOf<Event?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Schmotz Calendar") },
+                title = { Text("Schmotz") },
                 actions = {
                     TextButton(onClick = onSignOut) { Text("Sign out") }
                 }
@@ -44,8 +46,20 @@ fun HomeScreen(
                 }
             }
             when (tab) {
-                0 -> CalendarScreen(repo = repo, profile = profile)
-                1 -> UpcomingScreen(repo = repo, profile = profile)
+                0 -> CalendarScreen(
+                    repo = repo,
+                    profile = profile,
+                    pendingExternalEditEvent = pendingEditEvent,
+                    onExternalEditConsumed = { pendingEditEvent = null }
+                )
+                1 -> UpcomingScreen(
+                    repo = repo,
+                    profile = profile,
+                    onEventClick = { event ->
+                        pendingEditEvent = event
+                        tab = 0
+                    }
+                )
                 2 -> LinksScreen(repo = repo, profile = profile)
                 else -> SearchScreen(repo = repo, profile = profile)
             }
