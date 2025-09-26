@@ -667,11 +667,13 @@ private fun MonthGrid(
             } else {
                 val isToday = cell == today
                 val isSelected = cell == selectedDate
+                val isWeekend = cell.dayOfWeek == DayOfWeek.SATURDAY || cell.dayOfWeek == DayOfWeek.SUNDAY
                 val eventsForDay = eventsByDate[cell].orEmpty()
 
                 val bg = when {
                     isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     isToday -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                    isWeekend -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.18f)
                     else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.08f)
                 }
                 val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
@@ -896,7 +898,7 @@ private fun DaySchedule(
                     } else {
                         val offset = rowHeight * (startMinutes / 60f)
                         val blockHeight = (rowHeight * (durationMinutes / 60f)).let { calculated ->
-                            val minHeight = rowHeight * 0.5f
+                            val minHeight = 48.dp
                             if (calculated < minHeight) minHeight else calculated
                         }
                         offset to blockHeight

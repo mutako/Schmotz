@@ -203,6 +203,23 @@ fun LinkCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
+                    link.category.takeIf { it.isNotBlank() }?.let { category ->
+                        Spacer(Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Filled.Label,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.size(4.dp))
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = link.url,
