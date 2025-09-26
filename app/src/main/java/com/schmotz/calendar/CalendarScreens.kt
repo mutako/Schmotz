@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -670,7 +671,7 @@ private fun MonthGrid(
                 val isWeekend = cell.dayOfWeek == DayOfWeek.SATURDAY || cell.dayOfWeek == DayOfWeek.SUNDAY
                 val eventsForDay = eventsByDate[cell].orEmpty()
 
-                val weekendBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+                val weekendBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
                 val bg = when {
                     isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     isToday -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
@@ -747,7 +748,7 @@ private fun buildMonthCells(
 }
 
 @Composable
-private fun ColorPickerRow(
+internal fun ColorPickerRow(
     colors: List<Color>,
     selectedColorInt: Int,
     onSelect: (Int) -> Unit
@@ -770,7 +771,7 @@ private fun ColorPickerRow(
 }
 
 @Composable
-private fun ColorSwatch(
+internal fun ColorSwatch(
     color: Color,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -899,7 +900,7 @@ private fun DaySchedule(
                     } else {
                         val offset = rowHeight * (startMinutes / 60f)
                         val blockHeight = (rowHeight * (durationMinutes / 60f)).let { calculated ->
-                            val minHeight = 48.dp
+                            val minHeight = 72.dp
                             if (calculated < minHeight) minHeight else calculated
                         }
                         offset to blockHeight
@@ -920,7 +921,10 @@ private fun DaySchedule(
                             .padding(12.dp),
                         contentAlignment = Alignment.TopStart
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Top
+                        ) {
                             Text(
                                 text = event.title,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -929,11 +933,13 @@ private fun DaySchedule(
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            Spacer(Modifier.height(6.dp))
                             Text(
                                 text = formatEventTimeRangeShort(event, zone),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = textColor.copy(alpha = 0.9f)
                             )
+                            Spacer(modifier = Modifier.weight(1f, fill = true))
                         }
                     }
                 }
@@ -1050,19 +1056,19 @@ private fun eventSpanWithinDay(event: Event, date: LocalDate, zone: ZoneId): Pai
     return startMinutes to endMinutes
 }
 
-private fun eventColor(event: Event, defaultColor: Color): Color {
+internal fun eventColor(event: Event, defaultColor: Color): Color {
     return if (event.colorArgb != 0L) Color(event.colorArgb.toInt()) else defaultColor
 }
 
-private fun eventColorInt(event: Event, defaultColor: Color): Int {
+internal fun eventColorInt(event: Event, defaultColor: Color): Int {
     return if (event.colorArgb != 0L) event.colorArgb.toInt() else defaultColor.toArgb()
 }
 
-private fun contrastingTextColor(color: Color): Color {
+internal fun contrastingTextColor(color: Color): Color {
     return if (color.luminance() > 0.5f) Color.Black else Color.White
 }
 
-private fun colorIntToLong(colorInt: Int): Long = colorInt.toLong() and 0xFFFFFFFFL
+internal fun colorIntToLong(colorInt: Int): Long = colorInt.toLong() and 0xFFFFFFFFL
 
 private fun LocalDate.startOfWeek(firstDayOfWeek: DayOfWeek): LocalDate {
     var date = this
