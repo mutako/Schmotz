@@ -105,7 +105,20 @@ fun LinksScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(filteredLinks, key = { it.id }) { link ->
+                    items(
+                        items = filteredLinks,
+                        key = { link ->
+                            link.id.takeIf { it.isNotBlank() }
+                                ?: buildString {
+                                    append("url=")
+                                    append(link.url)
+                                    append("|at=")
+                                    append(link.sharedAt)
+                                    append("|hash=")
+                                    append(link.hashCode())
+                                }
+                        }
+                    ) { link ->
                         LinkCard(
                             link = link,
                             onEditCategory = { categoryDialogFor = it },
