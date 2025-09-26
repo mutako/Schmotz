@@ -6,12 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -20,16 +17,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -64,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -136,6 +134,7 @@ fun CalendarScreen(
     var validationError by remember { mutableStateOf<String?>(null) }
     var showRepeatChooser by remember { mutableStateOf(false) }
     var showMonthOverview by remember { mutableStateOf(false) }
+    var showQuickAddWeekPicker by remember { mutableStateOf(false) }
     var selectedColorInt by remember { mutableStateOf(0) }
     var pendingDeleteEvent by remember { mutableStateOf<Event?>(null) }
     val scope = rememberCoroutineScope()
@@ -222,7 +221,7 @@ fun CalendarScreen(
             Spacer(Modifier.width(12.dp))
             Button(onClick = { currentYearMonth = currentYearMonth.plusMonths(1) }) { Text(">") }
             Spacer(Modifier.weight(1f))
-            IconButton(onClick = { beginCreateEvent(selectedDate) }) {
+            IconButton(onClick = { showQuickAddWeekPicker = true }) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add event")
             }
         }
@@ -578,6 +577,18 @@ fun CalendarScreen(
             }
         )
     }
+
+    if (showQuickAddWeekPicker) {
+        QuickWeekPickerDialog(
+            anchorDate = selectedDate,
+            firstDayOfWeek = firstDayOfWeek,
+            onSelect = { date ->
+                showQuickAddWeekPicker = false
+                beginCreateEvent(date)
+            },
+            onDismiss = { showQuickAddWeekPicker = false }
+        )
+    }
 }
 
 @Composable
@@ -770,7 +781,7 @@ private fun DaySchedule(
             eventSpanWithinDay(event, date, zone)?.let { span -> event to span }
         }
     }
-    val rowHeight = 48.dp
+    val rowHeight = 56.dp
     val outline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
     val emptyBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
 
@@ -779,124 +790,122 @@ private fun DaySchedule(
         val fallback = LocalTime.now(zone).hour
         (firstEventHour ?: fallback).coerceIn(0, 23)
     }
-    val headerOffset = if (eventSpans.isEmpty()) 1 else 0
-    val listState = rememberLazyListState()
+    val scrollState = rememberScrollState()
+    val density = LocalDensity.current
 
-    LaunchedEffect(date, targetHour, headerOffset) {
-        listState.scrollToItem(targetHour + headerOffset)
+    LaunchedEffect(date, targetHour) {
+        val targetPx = with(density) { (rowHeight * targetHour).roundToPx() }
+        scrollState.scrollTo(targetPx)
     }
 
-    LazyColumn(
+    if (eventSpans.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 420.dp)
+                .padding(vertical = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No events yet.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        return
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 420.dp),
-        state = listState,
-        contentPadding = PaddingValues(vertical = 4.dp)
+            .heightIn(max = 420.dp)
+            .verticalScroll(scrollState)
     ) {
-        if (eventSpans.isEmpty()) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No events yet.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
-        items(24) { hour ->
-            val rowStart = hour * 60
-            val rowEnd = rowStart + 60
-            val covering = eventSpans.filter { (_, span) ->
-                span.first < rowEnd && span.second > rowStart
-            }
-            val primary = covering.minByOrNull { it.second.first }
-            val isStartHour = primary?.second?.let { span ->
-                span.first in rowStart until rowEnd
-            } ?: false
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(rowHeight)
-                    .padding(vertical = 2.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(64.dp)
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    Text(
-                        text = String.format(Locale.getDefault(), "%02d:00", hour),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                ) {
-                    val baseModifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp, outline, RoundedCornerShape(12.dp))
-
-                    if (primary == null) {
-                        Box(baseModifier.background(emptyBackground))
-                    } else {
-                        val event = primary.first
-                        val eventColor = eventColor(event, defaultEventColor)
-                        val textColor = contrastingTextColor(eventColor)
-                        Box(
-                            modifier = baseModifier
-                                .background(eventColor.copy(alpha = 0.9f))
-                                .clickable { onEventClick(event) }
-                                .padding(10.dp),
-                            contentAlignment = Alignment.TopStart
-                        ) {
-                            if (isStartHour) {
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(
-                                        text = event.title,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = textColor,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = formatEventTimeRangeShort(event, zone),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = textColor.copy(alpha = 0.9f)
-                                    )
-                                    if (covering.size > 1) {
-                                        Text(
-                                            text = "+${covering.size - 1} more",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = textColor.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+        Row(Modifier.fillMaxWidth()) {
+            Column(Modifier.width(64.dp)) {
+                repeat(24) { hour ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(rowHeight),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Text(
+                            text = String.format(Locale.getDefault(), "%02d:00", hour),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(rowHeight * 24)
+            ) {
+                Column {
+                    repeat(24) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(rowHeight)
+                                .background(emptyBackground)
+                        )
+                    }
+                }
+                repeat(25) { hour ->
                     Divider(
-                        modifier = Modifier.align(Alignment.BottomStart),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .offset(y = rowHeight * hour),
                         thickness = 0.5.dp,
                         color = outline
                     )
+                }
+                eventSpans.forEach { (event, span) ->
+                    val startMinutes = span.first
+                    val durationMinutes = (span.second - span.first).coerceAtLeast(1)
+                    val (topOffset, height) = if (event.allDay) {
+                        0.dp to rowHeight * 3
+                    } else {
+                        val offset = rowHeight * (startMinutes / 60f)
+                        val blockHeight = rowHeight * (durationMinutes / 60f).coerceAtLeast(rowHeight / 2)
+                        offset to blockHeight
+                    }
+                    val eventColor = eventColor(event, defaultEventColor)
+                    val textColor = contrastingTextColor(eventColor)
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .offset(y = topOffset)
+                            .fillMaxWidth()
+                            .height(height)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(eventColor.copy(alpha = 0.9f))
+                            .border(1.dp, outline, RoundedCornerShape(12.dp))
+                            .clickable { onEventClick(event) }
+                            .padding(12.dp),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = event.title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textColor,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = formatEventTimeRangeShort(event, zone),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = textColor.copy(alpha = 0.9f)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -1024,3 +1033,97 @@ private fun contrastingTextColor(color: Color): Color {
 }
 
 private fun colorIntToLong(colorInt: Int): Long = colorInt.toLong() and 0xFFFFFFFFL
+
+private fun LocalDate.startOfWeek(firstDayOfWeek: DayOfWeek): LocalDate {
+    var date = this
+    while (date.dayOfWeek != firstDayOfWeek) {
+        date = date.minusDays(1)
+    }
+    return date
+}
+
+@Composable
+private fun QuickWeekPickerDialog(
+    anchorDate: LocalDate,
+    firstDayOfWeek: DayOfWeek,
+    onSelect: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var weekStart by remember(anchorDate, firstDayOfWeek) {
+        mutableStateOf(anchorDate.startOfWeek(firstDayOfWeek))
+    }
+    val weekDates = remember(weekStart) { (0 until 7).map { weekStart.plusDays(it.toLong()) } }
+    val weekRangeText = remember(weekDates) {
+        val formatter = DateTimeFormatter.ofPattern("MMM d", Locale.getDefault())
+        val startText = weekDates.first().format(formatter)
+        val endText = weekDates.last().format(formatter)
+        "$startText – $endText"
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose a day") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = { weekStart = weekStart.minusWeeks(1) }) {
+                        Text("<")
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        weekRangeText,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(onClick = { weekStart = weekStart.plusWeeks(1) }) {
+                        Text(">")
+                    }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    weekDates.forEach { date ->
+                        val isToday = date == LocalDate.now()
+                        val isSelected = date == anchorDate
+                        val background = when {
+                            isSelected -> MaterialTheme.colorScheme.primary
+                            isToday -> MaterialTheme.colorScheme.secondaryContainer
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        }
+                        val contentColor = when {
+                            isSelected -> contrastingTextColor(MaterialTheme.colorScheme.primary)
+                            isToday -> MaterialTheme.colorScheme.onSecondaryContainer
+                            else -> MaterialTheme.colorScheme.onSurface
+                        }
+                        Column(
+                            modifier = Modifier
+                                .width(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(background)
+                                .clickable {
+                                    onSelect(date)
+                                }
+                                .padding(vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = contentColor
+                            )
+                            Text(
+                                text = date.dayOfMonth.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = contentColor
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
