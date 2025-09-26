@@ -670,11 +670,12 @@ private fun MonthGrid(
                 val isWeekend = cell.dayOfWeek == DayOfWeek.SATURDAY || cell.dayOfWeek == DayOfWeek.SUNDAY
                 val eventsForDay = eventsByDate[cell].orEmpty()
 
+                val weekendBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
                 val bg = when {
                     isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     isToday -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-                    isWeekend -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.18f)
-                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.08f)
+                    isWeekend -> weekendBackground
+                    else -> Color.Transparent
                 }
                 val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
 

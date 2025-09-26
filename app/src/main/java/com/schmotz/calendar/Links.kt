@@ -203,22 +203,26 @@ fun LinkCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    link.category.takeIf { it.isNotBlank() }?.let { category ->
-                        Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.Label,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.size(4.dp))
-                            Text(
-                                text = category,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                    val categoryLabel = link.category.ifBlank { "Uncategorized" }
+                    val categoryColor = if (link.category.isBlank()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Label,
+                            contentDescription = null,
+                            tint = categoryColor
+                        )
+                        Spacer(Modifier.size(4.dp))
+                        Text(
+                            text = categoryLabel,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = categoryColor
+                        )
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
