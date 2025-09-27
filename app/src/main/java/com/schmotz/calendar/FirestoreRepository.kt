@@ -79,7 +79,10 @@ class FirestoreRepository(
                         close(error)
                         return@addSnapshotListener
                     }
-                    val links = snapshot?.toObjects<SharedLink>().orEmpty()
+                    val links = snapshot?.documents.orEmpty()
+                        .mapNotNull { doc ->
+                            doc.toObject<SharedLink>()?.copy(id = doc.id)
+                        }
                     trySend(links.sortedByDescending { it.sharedAt })
                 }
             awaitClose { registration.remove() }

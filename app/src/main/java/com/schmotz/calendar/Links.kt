@@ -255,13 +255,12 @@ fun LinkCard(
                 Divider()
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "Recent comments",
+                    text = "Comments",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(8.dp))
                 link.comments.sortedBy { it.createdAt }
-                    .takeLast(2)
                     .forEach { comment ->
                         CommentRow(comment)
                         Spacer(Modifier.height(8.dp))

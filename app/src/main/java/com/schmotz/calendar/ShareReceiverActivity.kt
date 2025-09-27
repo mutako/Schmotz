@@ -45,7 +45,10 @@ class ShareReceiverActivity : Activity() {
             }
 
             val (title, desc, image) = fetchMetadata(url)
+            val collection = linksCollection(profile.householdCode)
+            val doc = collection.document()
             val link = SharedLink(
+                id = doc.id,
                 url = url,
                 title = title,
                 description = desc,
@@ -55,7 +58,7 @@ class ShareReceiverActivity : Activity() {
                 sharedByName = profile.displayName,
                 sharedAt = System.currentTimeMillis()
             )
-            linksCollection(profile.householdCode).add(link).await()
+            doc.set(link).await()
             Toast.makeText(this@ShareReceiverActivity, "Saved to Schmotz", Toast.LENGTH_SHORT).show()
             finish()
         }
