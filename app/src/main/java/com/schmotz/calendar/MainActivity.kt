@@ -5,7 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -32,28 +36,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AppRoot(auth: FirebaseAuth, repo: FirestoreRepository) {
     var user by remember { mutableStateOf(auth.currentUser) }
-    val profile by repo.observeProfile().collectAsState(initial = null)
-
-    LaunchedEffect(Unit) {
-        if (user == null) {
-            // Use anonymous sign-in to avoid Play Services UI issues.
-            auth.signInAnonymously().addOnCompleteListener {
-                user = auth.currentUser
-            }
-        }
-    }
-
     if (user == null) {
-        // Minimal splash while we sign in anonymously
-        androidx.compose.material3.Text("Signing in…")
-    } else {
-        HomeScreen(
-            repo = repo,
-            profile = profile,
-            onSignOut = {
-                auth.signOut()
-                user = null
-            }
+        LoginScreen(
+            auth = auth,
+            onAuthenticated = { authenticated -> user = authenticated }
         )
+    } else {
+        AuthGate(repo = repo) { profile ->
+            HomeScreen(
+                repo = repo,
+                profile = profile,
+                onSignOut = {
+                    auth.signOut()
+                    user = null
+                }
+            )
+        }
     }
 }

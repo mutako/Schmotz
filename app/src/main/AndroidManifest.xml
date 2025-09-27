@@ -4,7 +4,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="Schmotz Calender"
+        android:label="Schmotz"
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.SchmotzCalendar">
