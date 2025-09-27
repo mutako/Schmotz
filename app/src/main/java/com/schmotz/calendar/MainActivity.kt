@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -61,7 +62,9 @@ private fun AppRoot(auth: FirebaseAuth, repo: FirestoreRepository) {
                 .onSuccess { result ->
                     user = result.user ?: auth.currentUser
                 }
-                .onFailure { error = it.message ?: "Sign-in failed" }
+                .onFailure { throwable ->
+                    error = friendlyAuthError(throwable)
+                }
             isSigningIn = false
         } else {
             isSigningIn = false
@@ -99,5 +102,14 @@ private fun AppRoot(auth: FirebaseAuth, repo: FirestoreRepository) {
                 )
             }
         }
+    }
+}
+
+private fun friendlyAuthError(throwable: Throwable): String {
+    val firebaseCode = (throwable as? FirebaseAuthException)?.errorCode
+    return when (firebaseCode) {
+        "ERROR_ADMIN_RESTRICTED_OPERATION", "ERROR_OPERATION_NOT_ALLOWED" ->
+            "Anonymous sign-in is disabled for this Firebase project. Enable the Anonymous provider in the Firebase console (Authentication → Sign-in method) or supply alternative credentials."
+        else -> throwable.message ?: "Sign-in failed"
     }
 }
