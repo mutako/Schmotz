@@ -55,7 +55,12 @@ class ShareActivity : AppCompatActivity() {
                 }
                 val finalTitle = metaTitle.ifBlank { title.ifBlank { url } }
                 val finalDesc = metaDesc ?: desc
+                val collection = FirebaseFirestore.getInstance()
+                    .collection("households").document(profile.householdCode)
+                    .collection("links")
+                val doc = collection.document()
                 val link = SharedLink(
+                    id = doc.id,
                     title = finalTitle,
                     url = url,
                     description = finalDesc,
@@ -65,10 +70,7 @@ class ShareActivity : AppCompatActivity() {
                     sharedAt = System.currentTimeMillis()
                 )
                 // Store under household links collection.
-                FirebaseFirestore.getInstance()
-                    .collection("households").document(profile.householdCode)
-                    .collection("links").document()
-                    .set(link).await()
+                doc.set(link).await()
             } catch (e: Exception) {
                 // Swallow and just finish; could log if you add Crashlytics.
             } finally {

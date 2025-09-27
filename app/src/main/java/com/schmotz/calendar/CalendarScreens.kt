@@ -143,10 +143,17 @@ fun CalendarScreen(
     var showQuickAddWeekPicker by remember { mutableStateOf(false) }
     var selectedColorInt by remember { mutableStateOf(0) }
     var pendingDeleteEvent by remember { mutableStateOf<Event?>(null) }
+    var pendingEventToSave by remember { mutableStateOf<Event?>(null) }
+    var conflictEvent by remember { mutableStateOf<Event?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE, MMM d", Locale.getDefault()) }
+
+    fun recommendedEndTime(start: LocalTime): LocalTime {
+        val candidate = start.plusHours(1)
+        return if (candidate.isBefore(start)) LocalTime.of(23, 59) else candidate
+    }
 
     fun beginCreateEvent(forDate: LocalDate) {
         editingDate = forDate
@@ -159,13 +166,8 @@ fun CalendarScreen(
         } else {
             nowTime
         }
-        val tentativeEnd = adjustedStart.plusHours(1)
         startTime = adjustedStart
-        endTime = if (tentativeEnd.isBefore(adjustedStart)) {
-            LocalTime.of(23, 59)
-        } else {
-            tentativeEnd
-        }
+        endTime = recommendedEndTime(adjustedStart)
         repeatFrequency = RepeatFrequency.NONE
         validationError = null
         selectedColorInt = defaultEventColor.toArgb()
@@ -212,6 +214,44 @@ fun CalendarScreen(
             initial.minute,
             true
         ).show()
+    }
+
+    fun submitEvent(event: Event, bypassConflictCheck: Boolean = false) {
+        if (!bypassConflictCheck) {
+            val conflict = events.firstOrNull { existing ->
+                existing.id != event.id &&
+                    eventsOverlap(
+                        existing.startEpochMillis,
+                        existing.endEpochMillis,
+                        event.startEpochMillis,
+                        event.endEpochMillis
+                    )
+            }
+
+            if (conflict != null) {
+                pendingEventToSave = event
+                conflictEvent = conflict
+                return
+            }
+        }
+
+        scope.launch {
+            runCatching { repo.upsertEvent(profile, event) }
+                .onSuccess {
+                    newTitle = ""
+                    repeatFrequency = RepeatFrequency.NONE
+                    editingDate = null
+                    editingEvent = null
+                    validationError = null
+                    isAllDay = false
+                    selectedColorInt = defaultEventColor.toArgb()
+                    pendingEventToSave = null
+                    conflictEvent = null
+                }
+                .onFailure { throwable ->
+                    validationError = throwable.message ?: "Unable to save event"
+                }
+        }
     }
 
     val firstDayOfWeek = DayOfWeek.MONDAY
@@ -384,7 +424,19 @@ fun CalendarScreen(
                             Column {
                                 Text("Start", style = MaterialTheme.typography.labelMedium)
                                 Spacer(Modifier.height(4.dp))
-                                OutlinedButton(onClick = { showTimePicker(startTime) { startTime = it } }) {
+                                OutlinedButton(
+                                    onClick = {
+                                        showTimePicker(startTime) { picked ->
+                                            startTime = picked
+                                            if (!isAllDay) {
+                                                val recommended = recommendedEndTime(picked)
+                                                if (editingEvent == null || !endTime.isAfter(picked)) {
+                                                    endTime = recommended
+                                                }
+                                            }
+                                        }
+                                    }
+                                ) {
                                     Text(startTime.format(timeFormatter))
                                 }
                             }
@@ -467,27 +519,16 @@ fun CalendarScreen(
                     }
                     val chosenColorInt = if (selectedColorInt == 0) defaultEventColor.toArgb() else selectedColorInt
                     validationError = null
-                    scope.launch {
-                        runCatching {
-                            val base = editingEvent
-                            val event = (base ?: Event()).copy(
-                                title = trimmedTitle,
-                                startEpochMillis = startMillis,
-                                endEpochMillis = endMillis,
-                                allDay = isAllDay,
-                                repeatFrequency = repeatFrequency,
-                                colorArgb = colorIntToLong(chosenColorInt)
-                            )
-                            repo.upsertEvent(profile, event)
-                        }.onSuccess {
-                            newTitle = ""
-                            repeatFrequency = RepeatFrequency.NONE
-                            editingDate = null
-                            editingEvent = null
-                        }.onFailure {
-                            validationError = it.message ?: "Unable to save event"
-                        }
-                    }
+                    val base = editingEvent
+                    val event = (base ?: Event()).copy(
+                        title = trimmedTitle,
+                        startEpochMillis = startMillis,
+                        endEpochMillis = endMillis,
+                        allDay = isAllDay,
+                        repeatFrequency = repeatFrequency,
+                        colorArgb = colorIntToLong(chosenColorInt)
+                    )
+                    submitEvent(event)
                 }) { Text("Save") }
             },
             dismissButton = {
@@ -526,6 +567,46 @@ fun CalendarScreen(
                     repeatFrequency = RepeatFrequency.NONE
                     showRepeatChooser = false
                 }) { Text("No repeat") }
+            }
+        )
+    }
+
+    val conflictingEvent = conflictEvent
+    val pendingEvent = pendingEventToSave
+    if (conflictingEvent != null && pendingEvent != null) {
+        val zone = ZoneId.systemDefault()
+        val conflictStart = Instant.ofEpochMilli(conflictingEvent.startEpochMillis).atZone(zone)
+        val conflictEnd = Instant.ofEpochMilli(conflictingEvent.endEpochMillis).atZone(zone)
+        val conflictStartText = conflictStart.toLocalTime().format(timeFormatter)
+        val conflictEndText = conflictEnd.toLocalTime().format(timeFormatter)
+        AlertDialog(
+            onDismissRequest = {
+                conflictEvent = null
+                pendingEventToSave = null
+            },
+            title = { Text("Schedule conflict") },
+            text = {
+                Text(
+                    "\"${conflictingEvent.title}\" is already booked from $conflictStartText – $conflictEndText. " +
+                        "Do you want to keep both events or pick another time?"
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    conflictEvent = null
+                    pendingEventToSave = null
+                    submitEvent(pendingEvent, bypassConflictCheck = true)
+                }) {
+                    Text("Accept conflict")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    conflictEvent = null
+                    pendingEventToSave = null
+                }) {
+                    Text("Choose another time")
+                }
             }
         )
     }
@@ -674,7 +755,7 @@ private fun MonthGrid(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(96.dp)
+                        .height(72.dp)
                 )
             } else {
                 val isToday = cell == today
@@ -694,7 +775,7 @@ private fun MonthGrid(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 96.dp)
+                        .heightIn(min = 72.dp)
                         .clip(MaterialTheme.shapes.small)
                         .background(bg)
                         .border(
@@ -719,7 +800,7 @@ private fun MonthGrid(
                         if (eventsForDay.isNotEmpty()) {
                             Spacer(Modifier.height(4.dp))
                         }
-                        eventsForDay.take(3).forEach { event ->
+                        eventsForDay.take(2).forEach { event ->
                             val eventColor = eventColor(event, defaultEventColor)
                             val labelColor = contrastingTextColor(eventColor)
                             Box(
@@ -1083,6 +1164,10 @@ internal fun contrastingTextColor(color: Color): Color {
 }
 
 internal fun colorIntToLong(colorInt: Int): Long = colorInt.toLong() and 0xFFFFFFFFL
+
+private fun eventsOverlap(startA: Long, endA: Long, startB: Long, endB: Long): Boolean {
+    return startA < endB && startB < endA
+}
 
 private fun LocalDate.startOfWeek(firstDayOfWeek: DayOfWeek): LocalDate {
     var date = this
